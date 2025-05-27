@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Albarán - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Nuevo Albarán</h1>
+</div>
+
+<form method="POST" class="form">
+    <div class="form-group">
+        <label for="numero">Número de Albarán</label>
+        <input type="text" id="numero" name="numero" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" name="fecha" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label for="proveedor">Proveedor</label>
+        <input type="text" id="proveedor" name="proveedor" class="form-control" required>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Crear y agregar items</button>
+        <a href="{{ url_for('albaranes.index') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

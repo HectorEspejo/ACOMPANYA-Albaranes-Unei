@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Menús - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Gestión de Menús</h2>
+    <div class="action-group">
+        <a href="{{ url_for('menus.nuevo') }}" class="btn btn-success">Nuevo Menú</a>
+        <a href="{{ url_for('menus.calendario') }}" class="btn btn-info">Ver Calendario</a>
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('menus.listar') }}" class="albaran-section">
+    <h4>Filtros</h4>
+    <div class="form-row" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group">
+            <label for="semana" class="form-label">Semana</label>
+            <input type="number" class="form-control" id="semana" name="semana" 
+                   min="1" max="53" value="{{ request.args.get('semana', '') }}" placeholder="Nº semana">
+        </div>
+        <div class="form-group">
+            <label for="tipo_dieta" class="form-label">Tipo de Dieta</label>
+            <input type="text" class="form-control" id="tipo_dieta" name="tipo_dieta" 
+                   value="{{ request.args.get('tipo_dieta', '') }}" placeholder="Ej: basal">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{{ url_for('menus.listar') }}" class="btn btn-secondary">Limpiar</a>
+        </div>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Semana</th>
+            <th>Día</th>
+            <th>Tipo Comida</th>
+            <th>Dieta</th>
+            <th>Nº Platos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for menu in menus.items %}
+        <tr>
+            <td>{{ menu.nombre }}</td>
+            <td>{{ menu.numero_semana }}</td>
+            <td>{{ menu.dia_semana.value|title }}</td>
+            <td>{{ menu.tipo_comida.value|title }}</td>
+            <td>{{ menu.tipo_dieta }}</td>
+            <td>{{ menu.platos|length }}</td>
+            <td>
+                <div class="action-group">
+                    <a href="{{ url_for('menus.editar', id=menu.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('menus.preparar', id=menu.id) }}" class="btn btn-sm btn-success">Preparar</a>
+                    <form action="{{ url_for('menus.eliminar', id=menu.id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('¿Eliminar este menú?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if menus.has_prev or menus.has_next %}
+<div class="pagination">
+    {% if menus.has_prev %}
+        <a href="{{ url_for('menus.listar', page=menus.prev_num, **request.args) }}">← Anterior</a>
+    {% endif %}
+    
+    <span class="active">Página {{ menus.page }} de {{ menus.pages }}</span>
+    
+    {% if menus.has_next %}
+        <a href="{{ url_for('menus.listar', page=menus.next_num, **request.args) }}">Siguiente →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

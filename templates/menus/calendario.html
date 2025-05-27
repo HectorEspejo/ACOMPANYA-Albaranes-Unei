@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario de Menús - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Calendario de Menús</h2>
+    <a href="{{ url_for('menus.listar') }}" class="btn btn-primary">Volver al Listado</a>
+</div>
+
+<form method="GET" action="{{ url_for('menus.calendario') }}" class="albaran-section">
+    <div class="form-row" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group">
+            <label for="semana" class="form-label">Semana</label>
+            <input type="number" class="form-control" id="semana" name="semana" 
+                   min="1" max="53" value="{{ semana }}" required>
+        </div>
+        <div class="form-group">
+            <label for="tipo_dieta" class="form-label">Tipo de Dieta</label>
+            <input type="text" class="form-control" id="tipo_dieta" name="tipo_dieta" 
+                   value="{{ tipo_dieta }}" placeholder="basal">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Ver Calendario</button>
+        </div>
+    </div>
+</form>
+
+<div class="albaran-section">
+    <h3>Semana {{ semana }} - Dieta {{ tipo_dieta|title }}</h3>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Día</th>
+                <th>Desayuno</th>
+                <th>Almuerzo</th>
+                <th>Merienda</th>
+                <th>Cena</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dia in dias_semana %}
+            <tr>
+                <td><strong>{{ dia.value|title }}</strong></td>
+                {% for tipo in tipos_comida %}
+                <td>
+                    {% set menu = calendario[dia][tipo] %}
+                    {% if menu %}
+                        <div style="padding: 0.5rem; background-color: #f8f9fa; border-radius: 4px;">
+                            <strong>{{ menu.nombre }}</strong><br>
+                            <small>
+                                {% for plato in menu.platos %}
+                                    - {{ plato.nombre }}<br>
+                                {% endfor %}
+                            </small>
+                            <div class="action-group" style="margin-top: 0.5rem;">
+                                <a href="{{ url_for('menus.editar', id=menu.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="padding: 0.5rem; text-align: center; color: #999;">
+                            <em>Sin menú</em><br>
+                            <a href="{{ url_for('menus.nuevo') }}?semana={{ semana }}&dia={{ dia.value }}&tipo={{ tipo.value }}&dieta={{ tipo_dieta }}" 
+                               class="btn btn-sm btn-success">+ Crear</a>
+                        </div>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.table td {
+    vertical-align: top;
+}
+</style>
+{% endblock %}

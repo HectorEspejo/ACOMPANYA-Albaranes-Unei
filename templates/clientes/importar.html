@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Clientes desde CSV{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Importar Clientes desde CSV</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4>Formato del archivo CSV</h4>
+        <p>El archivo CSV debe tener las siguientes columnas:</p>
+        <ul>
+            <li><strong>"Mostrar nombre"</strong> o <strong>"Nombre"</strong>: Nombre del cliente</li>
+            <li><strong>"Ciudad"</strong>: Ciudad o ruta de entrega</li>
+        </ul>
+        
+        <div class="alert alert-info">
+            <strong>Ejemplo de formato:</strong><br>
+            <code>
+                "Mostrar nombre","Ciudad"<br>
+                "UNEI Iniciativa Social S.L., Faisem Málaga ( C.D ARQUIMEDES )","MÁLAGA RUTA 2"<br>
+                "UNEI Iniciativa Social S.L., Faisem Málaga ( C.D MALASAÑA ,25 )","MÁLAGA"<br>
+            </code>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file" class="form-label">Archivo CSV</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                <small class="text-muted">El archivo debe estar en formato CSV con codificación UTF-8</small>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Notas importantes:</strong>
+                <ul>
+                    <li>Los clientes duplicados (mismo nombre) no serán importados</li>
+                    <li>Las comillas alrededor de los valores serán eliminadas automáticamente</li>
+                    <li>Ambos campos (nombre y ciudad) son obligatorios</li>
+                </ul>
+            </div>
+
+            <div class="action-group">
+                <button type="submit" class="btn btn-success">Importar</button>
+                <a href="{{ url_for('clientes.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

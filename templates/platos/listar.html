@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Platos - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Gestión de Platos</h2>
+    <a href="{{ url_for('platos.nuevo') }}" class="btn btn-success">Nuevo Plato</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Lote</th>
+            <th>Stock Actual</th>
+            <th>Unidad</th>
+            <th>Nº Ingredientes</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for plato in platos.items %}
+        <tr>
+            <td>{{ plato.nombre }}</td>
+            <td>{{ plato.lote_propio or '-' }}</td>
+            <td>{{ plato.stock_actual }}</td>
+            <td>{{ plato.unidad }}</td>
+            <td>{{ plato.ingredientes|length }}</td>
+            <td>
+                <div class="action-group">
+                    <a href="{{ url_for('platos.editar', id=plato.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('platos.producir', id=plato.id) }}" class="btn btn-sm btn-success">Producir</a>
+                    <form action="{{ url_for('platos.eliminar', id=plato.id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('¿Eliminar este plato?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if platos.has_prev or platos.has_next %}
+<div class="pagination">
+    {% if platos.has_prev %}
+        <a href="{{ url_for('platos.listar', page=platos.prev_num) }}">← Anterior</a>
+    {% endif %}
+    
+    <span class="active">Página {{ platos.page }} de {{ platos.pages }}</span>
+    
+    {% if platos.has_next %}
+        <a href="{{ url_for('platos.listar', page=platos.next_num) }}">Siguiente →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Platos - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Importar Platos desde CSV</h2>
+    <a href="{{ url_for('importar.index') }}" class="btn btn-secondary">Volver</a>
+</div>
+
+<div class="albaran-section">
+    <h3>Instrucciones</h3>
+    <ol>
+        <li>El <strong>nombre del archivo CSV</strong> será usado como el nombre del plato</li>
+        <li>El archivo debe contener las siguientes columnas:
+            <ul>
+                <li><strong>"Líneas de la lista de materiales"</strong> - Nombres de los ingredientes</li>
+                <li><strong>"Líneas de la lista de materiales/Cantidad"</strong> - Cantidades necesarias</li>
+                <li><strong>"Líneas de la lista de materiales/Unidad de medida del producto"</strong> - Unidades (kg, g, ml, unidades, etc.)</li>
+            </ul>
+        </li>
+        <li>Podrá revisar y editar los datos antes de confirmar la importación</li>
+        <li>Se crearán automáticamente los ingredientes que no existan</li>
+    </ol>
+</div>
+
+<div class="albaran-section">
+    <h3>Seleccionar Archivo</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file" class="form-label">Archivo CSV</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+            <small class="text-muted">Formatos aceptados: .csv</small>
+        </div>
+        
+        <div class="action-group">
+            <button type="submit" class="btn btn-primary">Cargar y Revisar</button>
+            <a href="{{ url_for('importar.index') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<div class="albaran-section" style="background-color: #f8f9fa;">
+    <h4>Ejemplo de formato CSV:</h4>
+    <pre style="background-color: white; padding: 1rem; border-radius: 4px;">
+"Líneas de la lista de materiales","Líneas de la lista de materiales/Cantidad","Líneas de la lista de materiales/Unidad de medida del producto"
+"[26358] ALBONDIGA DE TERNERA ORTOLA","160.0","Unidades"
+"TOMATE TRITURADO","90.0","kg"
+"CEBOLLA GORDA PELADA","0.15","kg"
+"AZÚCAR","1.0","g"</pre>
+</div>
+{% endblock %}

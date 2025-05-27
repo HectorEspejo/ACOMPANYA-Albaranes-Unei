@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if menu else 'Nuevo' }} Menú - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ 'Editar' if menu else 'Nuevo' }} Menú</h2>
+</div>
+
+<form method="POST" action="">
+    <div class="albaran-section">
+        <h3>Información del Menú</h3>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="nombre" class="form-label">Nombre del Menú</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" 
+                       value="{{ menu.nombre if menu else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="tipo_dieta" class="form-label">Tipo de Dieta</label>
+                <input type="text" class="form-control" id="tipo_dieta" name="tipo_dieta" 
+                       value="{{ menu.tipo_dieta if menu else 'basal' }}" required>
+                <small class="text-muted">Ej: basal, diabética, hipocalórica, etc.</small>
+            </div>
+        </div>
+        
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="numero_semana" class="form-label">Número de Semana</label>
+                <input type="number" class="form-control" id="numero_semana" name="numero_semana" 
+                       min="1" max="53" value="{{ menu.numero_semana if menu else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="dia_semana" class="form-label">Día de la Semana</label>
+                <select class="form-control" id="dia_semana" name="dia_semana" required>
+                    <option value="">Seleccionar día...</option>
+                    {% for dia in dias_semana %}
+                    <option value="{{ dia.value }}" {% if menu and menu.dia_semana == dia %}selected{% endif %}>
+                        {{ dia.value|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="tipo_comida" class="form-label">Tipo de Comida</label>
+                <select class="form-control" id="tipo_comida" name="tipo_comida" required>
+                    <option value="">Seleccionar tipo...</option>
+                    {% for tipo in tipos_comida %}
+                    <option value="{{ tipo.value }}" {% if menu and menu.tipo_comida == tipo %}selected{% endif %}>
+                        {{ tipo.value|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="albaran-section">
+        <h3>Platos del Menú</h3>
+        <p>Agregue los platos que compondrán este menú:</p>
+        
+        <div id="platos-container">
+            {% if menu and platos_actuales %}
+                {% for plato, cantidad in platos_actuales %}
+                <div class="form-row" style="display: grid; grid-template-columns: 3fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <select name="plato_id[]" class="form-control" required>
+                            <option value="">Seleccionar plato...</option>
+                            {% for p in platos %}
+                            <option value="{{ p.id }}" {% if p.id == plato.id %}selected{% endif %}>
+                                {{ p.nombre }} (Stock: {{ p.stock_actual }} {{ p.unidad }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="cantidad_plato[]" class="form-control" 
+                               placeholder="Cantidad" min="1" value="{{ cantidad }}" required>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <button type="button" class="btn btn-info" onclick="addPlatoRow()">+ Añadir Plato</button>
+    </div>
+
+    <div class="action-group" style="margin-top: 2rem;">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('menus.listar') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<!-- Template for dynamic plato rows -->
+<template id="plato-row-template">
+    <div class="form-row" style="display: grid; grid-template-columns: 3fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+            <select name="plato_id[]" class="form-control" required>
+                <option value="">Seleccionar plato...</option>
+                {% for plato in platos %}
+                <option value="{{ plato.id }}">
+                    {{ plato.nombre }} (Stock: {{ plato.stock_actual }} {{ plato.unidad }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="number" name="cantidad_plato[]" class="form-control" 
+                   placeholder="Cantidad" min="1" required>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+    </div>
+</template>
+
+<script>
+function addPlatoRow() {
+    const container = document.getElementById('platos-container');
+    const template = document.getElementById('plato-row-template');
+    const newRow = template.content.cloneNode(true);
+    container.appendChild(newRow);
+}
+
+function removeRow(button) {
+    button.closest('.form-row').remove();
+}
+
+// Add at least one plato row if creating new menu
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('platos-container');
+    if (container.children.length === 0) {
+        addPlatoRow();
+    }
+});
+</script>
+{% endblock %}

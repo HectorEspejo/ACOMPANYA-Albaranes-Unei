@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Albaranes - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Albaranes</h1>
+    <a href="{{ url_for('albaranes.create') }}" class="btn btn-primary">Nuevo Albarán</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Fecha</th>
+                <th>Proveedor</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for albaran in albaranes %}
+            <tr>
+                <td>{{ albaran.numero }}</td>
+                <td>{{ albaran.fecha.strftime('%d/%m/%Y') }}</td>
+                <td>{{ albaran.proveedor }}</td>
+                <td>€{{ "%.2f"|format(albaran.total) }}</td>
+                <td>
+                    <span class="badge badge-{{ 'success' if albaran.estado == 'procesado' else 'warning' if albaran.estado == 'pendiente' else 'danger' }}">
+                        {{ albaran.estado.capitalize() }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{{ url_for('albaranes.edit', id=albaran.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+                    {% if albaran.estado == 'pendiente' %}
+                    <form method="POST" action="{{ url_for('albaranes.procesar', id=albaran.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">Procesar</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('albaranes.delete', id=albaran.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">No hay albaranes registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

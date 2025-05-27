@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Ingredientes - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Gestión de Ingredientes</h2>
+    <a href="{{ url_for('ingredientes.nuevo') }}" class="btn btn-success">Nuevo Ingrediente</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Tipo Unidad</th>
+            <th>Stock Actual</th>
+            <th>Lote</th>
+            <th>Fecha Caducidad</th>
+            <th>Es Plato</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ingrediente in ingredientes.items %}
+        <tr>
+            <td>{{ ingrediente.nombre }}</td>
+            <td>{{ ingrediente.tipo_unidad.value }}</td>
+            <td>{{ ingrediente.stock_actual }} {{ ingrediente.tipo_unidad.value }}</td>
+            <td>{{ ingrediente.lote or '-' }}</td>
+            <td>{{ ingrediente.fecha_caducidad.strftime('%d/%m/%Y') if ingrediente.fecha_caducidad else '-' }}</td>
+            <td>{{ 'Sí' if ingrediente.es_plato else 'No' }}</td>
+            <td>
+                <div class="action-group">
+                    <a href="{{ url_for('ingredientes.editar', id=ingrediente.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('ingredientes.ajustar_stock', id=ingrediente.id) }}" class="btn btn-sm btn-warning">Stock</a>
+                    <form action="{{ url_for('ingredientes.eliminar', id=ingrediente.id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('¿Eliminar este ingrediente?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if ingredientes.has_prev or ingredientes.has_next %}
+<div class="pagination">
+    {% if ingredientes.has_prev %}
+        <a href="{{ url_for('ingredientes.listar', page=ingredientes.prev_num) }}">← Anterior</a>
+    {% endif %}
+    
+    <span class="active">Página {{ ingredientes.page }} de {{ ingredientes.pages }}</span>
+    
+    {% if ingredientes.has_next %}
+        <a href="{{ url_for('ingredientes.listar', page=ingredientes.next_num) }}">Siguiente →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

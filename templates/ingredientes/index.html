@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Ingredientes - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Ingredientes</h1>
+    <a href="{{ url_for('ingredientes.create') }}" class="btn btn-primary">Nuevo Ingrediente</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Unidad</th>
+                <th>Stock Actual</th>
+                <th>Stock Mínimo</th>
+                <th>Precio Unitario</th>
+                <th>Proveedor</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ingrediente in ingredientes %}
+            <tr>
+                <td>{{ ingrediente.nombre }}</td>
+                <td>{{ ingrediente.unidad }}</td>
+                <td>{{ ingrediente.stock_actual }}</td>
+                <td>{{ ingrediente.stock_minimo }}</td>
+                <td>€{{ "%.2f"|format(ingrediente.precio_unitario) }}</td>
+                <td>{{ ingrediente.proveedor or '-' }}</td>
+                <td>
+                    <a href="{{ url_for('ingredientes.edit', id=ingrediente.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+                    <form method="POST" action="{{ url_for('ingredientes.delete', id=ingrediente.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No hay ingredientes registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

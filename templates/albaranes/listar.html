@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Albaranes - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Gestión de Albaranes</h2>
+    <a href="{{ url_for('albaranes.nuevo') }}" class="btn btn-success">Nuevo Albarán</a>
+</div>
+
+<form method="GET" action="{{ url_for('albaranes.listar') }}" class="albaran-section">
+    <h4>Filtros</h4>
+    <div class="form-row" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group">
+            <label for="fecha_desde" class="form-label">Desde</label>
+            <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
+                   value="{{ request.args.get('fecha_desde', '') }}">
+        </div>
+        <div class="form-group">
+            <label for="fecha_hasta" class="form-label">Hasta</label>
+            <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" 
+                   value="{{ request.args.get('fecha_hasta', '') }}">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{{ url_for('albaranes.listar') }}" class="btn btn-secondary">Limpiar</a>
+        </div>
+    </div>
+</form>
+
+<form id="export-form" method="POST" action="{{ url_for('albaranes.exportar_multiple_csv') }}">
+<div style="margin-bottom: 1rem;">
+    <button type="button" class="btn btn-secondary" onclick="selectAll()">Seleccionar Todos</button>
+    <button type="button" class="btn btn-secondary" onclick="deselectAll()">Deseleccionar Todos</button>
+    <button type="submit" class="btn btn-success" onclick="return validateExport()">Exportar Seleccionados a CSV</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th style="width: 40px;">
+                <input type="checkbox" id="select-all" onchange="toggleAll(this)">
+            </th>
+            <th>Referencia</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Ciudad</th>
+            <th>Nº Productos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for albaran in albaranes.items %}
+        <tr>
+            <td>
+                <input type="checkbox" name="albaran_ids[]" value="{{ albaran.id }}" class="albaran-checkbox">
+            </td>
+            <td>{{ albaran.referencia }}</td>
+            <td>{{ albaran.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{{ albaran.cliente.nombre if albaran.cliente else '-' }}</td>
+            <td>{{ albaran.cliente.ciudad if albaran.cliente else '-' }}</td>
+            <td>{{ albaran.detalles.count() }}</td>
+            <td>
+                <div class="action-group">
+                    <a href="{{ url_for('albaranes.ver', id=albaran.id) }}" class="btn btn-sm btn-info">Ver</a>
+                    <a href="{{ url_for('albaranes.editar', id=albaran.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{{ url_for('albaranes.imprimir', id=albaran.id) }}" class="btn btn-sm btn-primary" target="_blank">Imprimir</a>
+                    <a href="{{ url_for('albaranes.exportar_csv', id=albaran.id) }}" class="btn btn-sm btn-success">CSV</a>
+                    <form action="{{ url_for('albaranes.eliminar', id=albaran.id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('¿Eliminar este albarán?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</form>
+
+{% if albaranes.has_prev or albaranes.has_next %}
+<div class="pagination">
+    {% if albaranes.has_prev %}
+        <a href="{{ url_for('albaranes.listar', page=albaranes.prev_num, **request.args) }}">← Anterior</a>
+    {% endif %}
+    
+    <span class="active">Página {{ albaranes.page }} de {{ albaranes.pages }}</span>
+    
+    {% if albaranes.has_next %}
+        <a href="{{ url_for('albaranes.listar', page=albaranes.next_num, **request.args) }}">Siguiente →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+function toggleAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.albaran-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.albaran-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all');
+    checkboxes.forEach(cb => cb.checked = true);
+    selectAllCheckbox.checked = true;
+}
+
+function deselectAll() {
+    const checkboxes = document.querySelectorAll('.albaran-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all');
+    checkboxes.forEach(cb => cb.checked = false);
+    selectAllCheckbox.checked = false;
+}
+
+function validateExport() {
+    const checkboxes = document.querySelectorAll('.albaran-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Por favor, seleccione al menos un albarán para exportar.');
+        return false;
+    }
+    return true;
+}
+
+// Update select-all checkbox when individual checkboxes change
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.albaran-checkbox');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const totalCheckboxes = document.querySelectorAll('.albaran-checkbox').length;
+            const checkedCheckboxes = document.querySelectorAll('.albaran-checkbox:checked').length;
+            const selectAllCheckbox = document.getElementById('select-all');
+            
+            if (checkedCheckboxes === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes === totalCheckboxes) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

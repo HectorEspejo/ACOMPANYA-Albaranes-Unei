@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Menús - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Menús</h1>
+    <a href="{{ url_for('menus.create') }}" class="btn btn-primary">Nuevo Menú</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Fecha</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for menu in menus %}
+            <tr>
+                <td>{{ menu.nombre }}</td>
+                <td>{{ menu.fecha.strftime('%d/%m/%Y') }}</td>
+                <td>€{{ "%.2f"|format(menu.precio) }}</td>
+                <td>
+                    <span class="badge badge-{{ 'success' if menu.activo else 'secondary' }}">
+                        {{ 'Activo' if menu.activo else 'Inactivo' }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{{ url_for('menus.platos', id=menu.id) }}" class="btn btn-sm btn-info">Platos</a>
+                    <a href="{{ url_for('menus.edit', id=menu.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+                    <form method="POST" action="{{ url_for('menus.delete', id=menu.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No hay menús registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

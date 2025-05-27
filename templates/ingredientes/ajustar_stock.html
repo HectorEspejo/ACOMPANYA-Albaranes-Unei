@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Ajustar Stock - {{ ingrediente.nombre }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Ajustar Stock: {{ ingrediente.nombre }}</h2>
+</div>
+
+<div class="albaran-header">
+    <h3>Información del Ingrediente</h3>
+    <div class="albaran-info">
+        <div>
+            <strong>Nombre:</strong> {{ ingrediente.nombre }}
+        </div>
+        <div>
+            <strong>Stock Actual:</strong> {{ ingrediente.stock_actual }} {{ ingrediente.tipo_unidad.value }}
+        </div>
+        <div>
+            <strong>Lote:</strong> {{ ingrediente.lote or 'Sin lote' }}
+        </div>
+        <div>
+            <strong>Fecha Caducidad:</strong> 
+            {{ ingrediente.fecha_caducidad.strftime('%d/%m/%Y') if ingrediente.fecha_caducidad else 'No especificada' }}
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="">
+    <div class="form-group">
+        <label for="tipo_movimiento" class="form-label">Tipo de Movimiento</label>
+        <select class="form-control" id="tipo_movimiento" name="tipo_movimiento" required>
+            {% for tipo in tipos_movimiento %}
+                <option value="{{ tipo.value }}">
+                    {% if tipo.value == 'entrada' %}
+                        Entrada (Aumentar stock)
+                    {% elif tipo.value == 'salida' %}
+                        Salida (Disminuir stock)
+                    {% else %}
+                        Ajuste (Establecer nuevo valor)
+                    {% endif %}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="cantidad" class="form-label">Cantidad</label>
+        <input type="number" class="form-control" id="cantidad" name="cantidad" 
+               step="0.01" min="0.01" required>
+        <small class="text-muted">
+            Para entrada/salida: cantidad a sumar/restar. Para ajuste: nuevo valor de stock.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label for="motivo" class="form-label">Motivo (opcional)</label>
+        <textarea class="form-control" id="motivo" name="motivo" rows="3" 
+                  placeholder="Ej: Compra mensual, merma, inventario físico..."></textarea>
+    </div>
+
+    <div class="action-group">
+        <button type="submit" class="btn btn-success">Confirmar Ajuste</button>
+        <a href="{{ url_for('ingredientes.listar') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

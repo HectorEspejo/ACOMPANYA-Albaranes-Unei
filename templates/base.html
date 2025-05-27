@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Acompanya - Sistema de Albaranes{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Acompanya</h1>
+                <span class="subtitle">Sistema de Gestión de Albaranes</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                <li><a href="{{ url_for('ingredientes.listar') }}">Ingredientes</a></li>
+                <li><a href="{{ url_for('platos.listar') }}">Platos</a></li>
+                <li><a href="{{ url_for('menus.listar') }}">Menús</a></li>
+                <li><a href="{{ url_for('clientes.listar') }}">Clientes</a></li>
+                <li><a href="{{ url_for('albaranes.listar') }}">Albaranes</a></li>
+                <li><a href="{{ url_for('importar.index') }}">Importar</a></li>
+            </ul>
+        </nav>
+        {% if config.DEBUG_MODE %}
+        <div class="debug-mode-banner">
+            <strong>⚠️ MODO DEBUG ACTIVO</strong> - Las verificaciones de stock están deshabilitadas
+        </div>
+        {% endif %}
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                            <button type="button" class="close" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Acompanya - Cocina Industrial</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

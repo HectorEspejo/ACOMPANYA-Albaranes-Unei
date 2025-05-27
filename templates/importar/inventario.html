@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Inventario de Platos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Importar Inventario de Platos</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4>Formato del archivo CSV</h4>
+        <p>El archivo CSV debe tener el siguiente formato:</p>
+        <ul>
+            <li>Una columna llamada <strong>"Nombre"</strong> con el nombre de cada plato</li>
+            <li>Cada fila representa un plato diferente</li>
+            <li>Los platos se crearán con stock inicial 0 y unidad "unidades"</li>
+        </ul>
+        
+        <div class="alert alert-info">
+            <strong>Ejemplo:</strong><br>
+            <code>
+                Nombre<br>
+                "ALBONDIGAS DE TERNERA CON SALSA DE TOMATE Y VERDURAS"<br>
+                "ARROZ CON POLLO"<br>
+                "MERLUZA AL HORNO CON PATATAS"<br>
+            </code>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file" class="form-label">Archivo CSV</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Nota:</strong> Los platos que ya existan en el sistema no serán modificados.
+            </div>
+
+            <div class="action-group">
+                <button type="submit" class="btn btn-success">Importar</button>
+                <a href="{{ url_for('importar.index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

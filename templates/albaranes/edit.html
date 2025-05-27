@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Albarán - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Editar Albarán</h1>
+</div>
+
+<form method="POST" class="form">
+    <div class="form-group">
+        <label for="numero">Número de Albarán</label>
+        <input type="text" id="numero" name="numero" class="form-control" value="{{ albaran.numero }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" name="fecha" class="form-control" value="{{ albaran.fecha.strftime('%Y-%m-%d') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="proveedor">Proveedor</label>
+        <input type="text" id="proveedor" name="proveedor" class="form-control" value="{{ albaran.proveedor }}" required>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <a href="{{ url_for('albaranes.index') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<hr>
+
+<h3>Items del Albarán</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in albaran.items %}
+                <tr>
+                    <td>{{ item.ingrediente.nombre }}</td>
+                    <td>{{ item.cantidad }} {{ item.ingrediente.unidad }}</td>
+                    <td>€{{ "%.2f"|format(item.precio_unitario) }}</td>
+                    <td>€{{ "%.2f"|format(item.precio_total) }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No hay items en este albarán</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3">Total</th>
+                    <th>€{{ "%.2f"|format(albaran.total) }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="col-md-4">
+        <h4>Agregar item</h4>
+        <form method="POST" action="#" class="form">
+            <div class="form-group">
+                <label for="ingrediente_id">Ingrediente</label>
+                <select id="ingrediente_id" name="ingrediente_id" class="form-control" required>
+                    <option value="">Seleccionar...</option>
+                    {% for ingrediente in ingredientes %}
+                    <option value="{{ ingrediente.id }}">{{ ingrediente.nombre }} ({{ ingrediente.unidad }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="precio_unitario">Precio Unitario (€)</label>
+                <input type="number" id="precio_unitario" name="precio_unitario" class="form-control" step="0.01" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Agregar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

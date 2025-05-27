@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Platos de {{ menu.nombre }} - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Platos de {{ menu.nombre }}</h1>
+    <a href="{{ url_for('menus.index') }}" class="btn btn-secondary">Volver a Menús</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Platos del menú</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Plato</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in menu.platos %}
+                <tr>
+                    <td>{{ item.plato.nombre }}</td>
+                    <td>{{ item.plato.categoria or '-' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger">Quitar</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">No hay platos asignados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h3>Agregar plato</h3>
+        <form method="POST" class="form">
+            <div class="form-group">
+                <label for="plato_id">Plato</label>
+                <select id="plato_id" name="plato_id" class="form-control" required>
+                    <option value="">Seleccionar...</option>
+                    {% for plato in platos %}
+                    <option value="{{ plato.id }}">{{ plato.nombre }} ({{ plato.categoria or 'Sin categoría' }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Agregar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

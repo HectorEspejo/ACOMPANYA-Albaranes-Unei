@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Platos - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Platos</h1>
+    <a href="{{ url_for('platos.create') }}" class="btn btn-primary">Nuevo Plato</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plato in platos %}
+            <tr>
+                <td>{{ plato.nombre }}</td>
+                <td>{{ plato.categoria or '-' }}</td>
+                <td>€{{ "%.2f"|format(plato.precio) }}</td>
+                <td>
+                    <span class="badge badge-{{ 'success' if plato.activo else 'secondary' }}">
+                        {{ 'Activo' if plato.activo else 'Inactivo' }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{{ url_for('platos.ingredientes', id=plato.id) }}" class="btn btn-sm btn-info">Ingredientes</a>
+                    <a href="{{ url_for('platos.edit', id=plato.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+                    <form method="POST" action="{{ url_for('platos.delete', id=plato.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No hay platos registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

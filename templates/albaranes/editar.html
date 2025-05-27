@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Albarán - {{ albaran.referencia }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Editar Albarán: {{ albaran.referencia }}</h2>
+</div>
+
+<form method="POST" action="">
+    <div class="albaran-section">
+        <h3>Información General</h3>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" 
+                       value="{{ albaran.fecha.strftime('%Y-%m-%d') }}" required>
+            </div>
+            <div class="form-group">
+                <label for="cliente_id" class="form-label">Cliente</label>
+                <select class="form-control" id="cliente_id" name="cliente_id" onchange="updateDestinatario()">
+                    <option value="">-- Seleccionar Cliente --</option>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" data-ciudad="{{ cliente.ciudad }}"
+                                {% if albaran.cliente_id == cliente.id %}selected{% endif %}>
+                            {{ cliente.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="destinatario" class="form-label">Destinatario / Observaciones</label>
+                <input type="text" class="form-control" id="destinatario" name="destinatario" 
+                       value="{{ albaran.destinatario or '' }}"
+                       placeholder="Información adicional del destinatario">
+                <small class="text-muted">Se completará automáticamente con la información del cliente seleccionado</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="albaran-section">
+        <h3>Menús</h3>
+        <p>Seleccione los menús y cantidades a incluir en el albarán:</p>
+        
+        <div id="menus-container">
+            <!-- Existing menus will be added here by JavaScript -->
+        </div>
+        
+        <button type="button" class="btn btn-info" onclick="addMenuRow()">+ Añadir Menú</button>
+    </div>
+
+    <div class="albaran-section">
+        <h3>Platos Individuales</h3>
+        <p>Opcionalmente, añada platos individuales (no incluidos en menús):</p>
+        
+        <div id="platos-container">
+            <!-- Existing individual dishes will be added here by JavaScript -->
+        </div>
+        
+        <button type="button" class="btn btn-info" onclick="addPlatoRow()">+ Añadir Plato</button>
+    </div>
+
+    <div class="action-group" style="margin-top: 2rem;">
+        <button type="submit" class="btn btn-success">Actualizar Albarán</button>
+        <a href="{{ url_for('albaranes.ver', id=albaran.id) }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<!-- Templates for dynamic rows -->
+<template id="menu-row-template">
+    <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+            <select name="menu_id[]" class="form-control" required>
+                <option value="">Seleccionar menú...</option>
+                {% for menu in menus %}
+                <option value="{{ menu.id }}">
+                    {{ menu.nombre }} ({{ menu.tipo_comida.value|title }} - S{{ menu.numero_semana }} {{ menu.dia_semana.value|title }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="number" name="cantidad_menu[]" class="form-control" 
+                   placeholder="Cantidad" min="1" required>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+    </div>
+</template>
+
+<template id="plato-row-template">
+    <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+            <select name="plato_individual_id[]" class="form-control">
+                <option value="">Seleccionar plato...</option>
+                {% for plato in platos %}
+                <option value="{{ plato.id }}">
+                    {{ plato.nombre }} (Stock: {{ plato.stock_actual }} {{ plato.unidad }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="number" name="cantidad_plato_individual[]" class="form-control" 
+                   placeholder="Cantidad" min="0.1" step="0.1">
+        </div>
+        <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+    </div>
+</template>
+
+<script>
+function addMenuRow(menuId = null, cantidad = null) {
+    const container = document.getElementById('menus-container');
+    const template = document.getElementById('menu-row-template');
+    const newRow = template.content.cloneNode(true);
+    
+    // If menuId is provided, select it
+    if (menuId) {
+        const select = newRow.querySelector('select[name="menu_id[]"]');
+        select.value = menuId;
+    }
+    
+    // If cantidad is provided, set it
+    if (cantidad) {
+        const input = newRow.querySelector('input[name="cantidad_menu[]"]');
+        input.value = cantidad;
+    }
+    
+    container.appendChild(newRow);
+}
+
+function addPlatoRow(platoId = null, cantidad = null) {
+    const container = document.getElementById('platos-container');
+    const template = document.getElementById('plato-row-template');
+    const newRow = template.content.cloneNode(true);
+    
+    // If platoId is provided, select it
+    if (platoId) {
+        const select = newRow.querySelector('select[name="plato_individual_id[]"]');
+        select.value = platoId;
+    }
+    
+    // If cantidad is provided, set it
+    if (cantidad) {
+        const input = newRow.querySelector('input[name="cantidad_plato_individual[]"]');
+        input.value = cantidad;
+    }
+    
+    container.appendChild(newRow);
+}
+
+function removeRow(button) {
+    button.closest('.form-row').remove();
+}
+
+function updateDestinatario() {
+    const clienteSelect = document.getElementById('cliente_id');
+    const destinatarioInput = document.getElementById('destinatario');
+    
+    if (clienteSelect.value) {
+        const selectedOption = clienteSelect.options[clienteSelect.selectedIndex];
+        const clienteNombre = selectedOption.text;
+        const ciudad = selectedOption.getAttribute('data-ciudad');
+        destinatarioInput.value = `${clienteNombre} - ${ciudad}`;
+    } else {
+        destinatarioInput.value = '';
+    }
+}
+
+// Load existing data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load existing menus
+    {% for menu_id, data in menus_en_albaran.items() %}
+        addMenuRow({{ menu_id }}, {{ data.cantidad }});
+    {% endfor %}
+    
+    // Load existing individual dishes
+    {% for detalle in detalles_individuales %}
+        addPlatoRow({{ detalle.plato_id }}, {{ detalle.cantidad_entregada }});
+    {% endfor %}
+    
+    // If no rows exist, add at least one menu row
+    if (document.getElementById('menus-container').children.length === 0) {
+        addMenuRow();
+    }
+});
+</script>
+{% endblock %}

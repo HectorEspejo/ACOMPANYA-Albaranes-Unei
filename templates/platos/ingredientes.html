@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Ingredientes de {{ plato.nombre }} - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Ingredientes de {{ plato.nombre }}</h1>
+    <a href="{{ url_for('platos.index') }}" class="btn btn-secondary">Volver a Platos</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Ingredientes del plato</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in plato.ingredientes %}
+                <tr>
+                    <td>{{ item.ingrediente.nombre }}</td>
+                    <td>{{ item.cantidad }} {{ item.ingrediente.unidad }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger">Quitar</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">No hay ingredientes asignados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h3>Agregar ingrediente</h3>
+        <form method="POST" class="form">
+            <div class="form-group">
+                <label for="ingrediente_id">Ingrediente</label>
+                <select id="ingrediente_id" name="ingrediente_id" class="form-control" required>
+                    <option value="">Seleccionar...</option>
+                    {% for ingrediente in ingredientes %}
+                    <option value="{{ ingrediente.id }}">{{ ingrediente.nombre }} ({{ ingrediente.unidad }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Agregar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

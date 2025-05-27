@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Tipos de Menú{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Importar Tipos de Menú</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4>Información importante</h4>
+        <p>Esta herramienta creará menús automáticamente basándose en los tipos de menú del archivo CSV.</p>
+        
+        <div class="alert alert-info">
+            <strong>¿Qué hace esta importación?</strong>
+            <ul>
+                <li>Por cada tipo de menú en el archivo, creará <strong>28 menús</strong></li>
+                <li>4 semanas × 7 días de la semana = 28 menús por tipo</li>
+                <li>Ejemplo: "BASAL" generará:
+                    <ul>
+                        <li>BASAL S1 Lunes Almuerzo</li>
+                        <li>BASAL S1 Martes Almuerzo</li>
+                        <li>... hasta BASAL S4 Domingo Almuerzo</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <h4>Formato del archivo CSV</h4>
+        <p>El archivo debe tener una columna llamada <strong>"Valores"</strong> con los tipos de menú:</p>
+        
+        <div class="alert alert-secondary">
+            <code>
+                Valores<br>
+                BASAL<br>
+                DIABÉTICO<br>
+                SIN SAL<br>
+                VEGETARIANO<br>
+                ...
+            </code>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="tipo_comida" class="form-label">Tipo de Comida</label>
+                <select class="form-control" id="tipo_comida" name="tipo_comida" required>
+                    <option value="almuerzo">Almuerzo</option>
+                    <option value="cena">Cena</option>
+                    <option value="desayuno">Desayuno</option>
+                    <option value="merienda">Merienda</option>
+                </select>
+                <small class="text-muted">Seleccione el tipo de comida para todos los menús a crear</small>
+            </div>
+
+            <div class="form-group">
+                <label for="file" class="form-label">Archivo CSV</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                <small class="text-muted">El archivo debe estar en formato CSV con codificación UTF-8</small>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Notas importantes:</strong>
+                <ul>
+                    <li>Los menús que ya existan no serán modificados</li>
+                    <li>Se crearán menús vacíos (sin platos). Deberá añadir los platos posteriormente</li>
+                    <li>El proceso puede tardar varios segundos si hay muchos tipos de menú</li>
+                </ul>
+            </div>
+
+            <div class="action-group">
+                <button type="submit" class="btn btn-success">Importar Tipos de Menú</button>
+                <a href="{{ url_for('importar.index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

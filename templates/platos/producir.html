@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Producir Plato - {{ plato.nombre }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Producir: {{ plato.nombre }}</h2>
+</div>
+
+<div class="albaran-header">
+    <h3>Información del Plato</h3>
+    <div class="albaran-info">
+        <div>
+            <strong>Nombre:</strong> {{ plato.nombre }}
+        </div>
+        <div>
+            <strong>Stock Actual:</strong> {{ plato.stock_actual }} {{ plato.unidad }}
+        </div>
+        <div>
+            <strong>Lote:</strong> {{ plato.lote_propio or 'Sin lote' }}
+        </div>
+    </div>
+</div>
+
+<div class="albaran-section">
+    <h3>Ingredientes Necesarios</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ingrediente</th>
+                <th>Cantidad por Unidad</th>
+                <th>Stock Disponible</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ingrediente, cantidad, unidad in ingredientes %}
+            <tr>
+                <td>{{ ingrediente.nombre }}</td>
+                <td>{{ cantidad }} {{ unidad }}</td>
+                <td>{{ ingrediente.stock_actual }} {{ ingrediente.tipo_unidad.value }}</td>
+                <td>
+                    {% if config.DEBUG_MODE %}
+                        <span style="color: orange;">⚠️ Debug Mode</span>
+                    {% elif ingrediente.stock_actual >= cantidad %}
+                        <span style="color: green;">✓ Suficiente</span>
+                    {% else %}
+                        <span style="color: red;">✗ Insuficiente</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="POST" action="">
+    <div class="form-group">
+        <label for="cantidad" class="form-label">Cantidad a Producir</label>
+        <input type="number" class="form-control" id="cantidad" name="cantidad" 
+               min="1" step="1" required>
+        <small class="text-muted">
+            Ingrese la cantidad de {{ plato.unidad }} que desea producir
+        </small>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Nota:</strong> Al producir este plato se descontarán automáticamente los ingredientes necesarios del inventario.
+    </div>
+    
+    {% if config.DEBUG_MODE %}
+    <div class="alert alert-warning">
+        <strong>⚠️ Modo Debug Activo:</strong> Las verificaciones de stock están deshabilitadas. Se permitirá la producción aunque no haya ingredientes suficientes.
+    </div>
+    {% endif %}
+
+    <div class="action-group">
+        <button type="submit" class="btn btn-success">Producir</button>
+        <a href="{{ url_for('platos.listar') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<script>
+// Calculate required ingredients when quantity changes
+document.getElementById('cantidad').addEventListener('input', function() {
+    const cantidad = parseFloat(this.value) || 0;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach((row, index) => {
+        const cells = row.cells;
+        const cantidadBase = parseFloat(cells[1].textContent.split(' ')[0]);
+        const stockDisponible = parseFloat(cells[2].textContent.split(' ')[0]);
+        const cantidadNecesaria = cantidadBase * cantidad;
+        
+        const debugMode = {{ 'true' if config.DEBUG_MODE else 'false' }};
+        
+        if (debugMode) {
+            cells[3].innerHTML = '<span style="color: orange;">⚠️ Debug Mode</span>';
+        } else if (stockDisponible >= cantidadNecesaria) {
+            cells[3].innerHTML = '<span style="color: green;">✓ Suficiente</span>';
+        } else {
+            cells[3].innerHTML = `<span style="color: red;">✗ Insuficiente (necesario: ${cantidadNecesaria.toFixed(2)})</span>`;
+        }
+    });
+});
+</script>
+{% endblock %}

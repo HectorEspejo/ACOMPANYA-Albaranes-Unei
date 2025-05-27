@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if plato else 'Nuevo' }} Plato - Acompanya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ 'Editar' if plato else 'Nuevo' }} Plato</h2>
+</div>
+
+<form method="POST" action="">
+    <div class="form-group">
+        <label for="nombre" class="form-label">Nombre del Plato</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" 
+               value="{{ plato.nombre if plato else '' }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="lote_propio" class="form-label">Lote del Plato</label>
+        <input type="text" class="form-control" id="lote_propio" name="lote_propio" 
+               value="{{ plato.lote_propio if plato else '' }}">
+    </div>
+
+    <div class="form-group">
+        <label for="unidad" class="form-label">Unidad de Medida</label>
+        <input type="text" class="form-control" id="unidad" name="unidad" 
+               value="{{ plato.unidad if plato else 'unidades' }}" required>
+        <small class="text-muted">Ej: unidades, raciones, porciones</small>
+    </div>
+
+    <div class="form-group">
+        <label for="stock_actual" class="form-label">Stock Inicial</label>
+        <input type="number" class="form-control" id="stock_actual" name="stock_actual" 
+               step="0.01" min="0" value="{{ plato.stock_actual if plato else '0' }}"
+               {% if plato %}readonly{% endif %}>
+        {% if plato %}
+            <small class="text-muted">Para producir más unidades, use la opción "Producir" desde el listado</small>
+        {% endif %}
+    </div>
+
+    <div class="albaran-section">
+        <h3>Ingredientes del Plato</h3>
+        <p>Agregue los ingredientes necesarios para preparar una unidad de este plato:</p>
+        
+        <div id="ingredientes-container">
+            {% if plato and ingredientes_actuales %}
+                {% for ing, cantidad, unidad in ingredientes_actuales %}
+                <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <select name="ingrediente_id[]" class="form-control" required>
+                            <option value="">Seleccionar ingrediente...</option>
+                            {% for ingrediente in ingredientes %}
+                            <option value="{{ ingrediente.id }}" {% if ingrediente.id == ing.id %}selected{% endif %}>
+                                {{ ingrediente.nombre }} (Stock: {{ ingrediente.stock_actual }} {{ ingrediente.tipo_unidad.value }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="cantidad[]" class="form-control" 
+                               placeholder="Cantidad" step="0.001" min="0.001" value="{{ cantidad }}" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="unidad_ingrediente[]" class="form-control" 
+                               placeholder="Unidad" value="{{ unidad }}" required>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <button type="button" class="btn btn-info" onclick="addIngredientRow()">+ Añadir Ingrediente</button>
+    </div>
+
+    <div class="action-group" style="margin-top: 2rem;">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('platos.listar') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<!-- Template for dynamic ingredient rows -->
+<template id="ingrediente-row-template">
+    <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+            <select name="ingrediente_id[]" class="form-control" required>
+                <option value="">Seleccionar ingrediente...</option>
+                {% for ingrediente in ingredientes %}
+                <option value="{{ ingrediente.id }}">
+                    {{ ingrediente.nombre }} (Stock: {{ ingrediente.stock_actual }} {{ ingrediente.tipo_unidad.value }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="number" name="cantidad[]" class="form-control" 
+                   placeholder="Cantidad" step="0.001" min="0.001" required>
+        </div>
+        <div class="form-group">
+            <input type="text" name="unidad_ingrediente[]" class="form-control" 
+                   placeholder="Unidad" required>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="removeRow(this)">Eliminar</button>
+    </div>
+</template>
+
+<script>
+function addIngredientRow() {
+    const container = document.getElementById('ingredientes-container');
+    const template = document.getElementById('ingrediente-row-template');
+    const newRow = template.content.cloneNode(true);
+    container.appendChild(newRow);
+}
+
+function removeRow(button) {
+    button.closest('.form-row').remove();
+}
+
+// Add at least one ingredient row if creating new plato
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('ingredientes-container');
+    if (container.children.length === 0) {
+        addIngredientRow();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Plato - Albaranes UNEI2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Editar Plato</h1>
+</div>
+
+<form method="POST" class="form">
+    <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" class="form-control" value="{{ plato.nombre }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria" class="form-control">
+            <option value="">Seleccionar...</option>
+            <option value="Entrante" {% if plato.categoria == 'Entrante' %}selected{% endif %}>Entrante</option>
+            <option value="Primero" {% if plato.categoria == 'Primero' %}selected{% endif %}>Primero</option>
+            <option value="Segundo" {% if plato.categoria == 'Segundo' %}selected{% endif %}>Segundo</option>
+            <option value="Postre" {% if plato.categoria == 'Postre' %}selected{% endif %}>Postre</option>
+            <option value="Bebida" {% if plato.categoria == 'Bebida' %}selected{% endif %}>Bebida</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="precio">Precio (€)</label>
+        <input type="number" id="precio" name="precio" class="form-control" step="0.01" value="{{ plato.precio }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="activo" {% if plato.activo %}checked{% endif %}> Activo
+        </label>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <a href="{{ url_for('platos.index') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}
