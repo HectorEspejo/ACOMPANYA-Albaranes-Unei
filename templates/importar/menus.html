@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Importar Menús</h2>
+    
+    <form method="POST" action="{{ url_for('importar.upload_menus') }}" enctype="multipart/form-data">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Datos del Menú</h5>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="semana" class="form-label">Número de Semana</label>
+                        <input type="number" class="form-control" id="semana" name="semana" required min="1" max="52">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="dia" class="form-label">Día de la Semana</label>
+                        <select class="form-control" id="dia" name="dia" required>
+                            <option value="">Seleccione un día</option>
+                            <option value="LUNES">Lunes</option>
+                            <option value="MARTES">Martes</option>
+                            <option value="MIERCOLES">Miércoles</option>
+                            <option value="JUEVES">Jueves</option>
+                            <option value="VIERNES">Viernes</option>
+                            <option value="SABADO">Sábado</option>
+                            <option value="DOMINGO">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="comida" class="form-label">Tipo de Comida</label>
+                        <select class="form-control" id="comida" name="comida" required>
+                            <option value="">Seleccione tipo de comida</option>
+                            <option value="ALMUERZO">Almuerzo</option>
+                            <option value="CENA">Cena</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="file" class="form-label">Archivo CSV</label>
+                    <input type="file" class="form-control" id="file" name="file" required accept=".csv">
+                    <div class="form-text">
+                        El archivo debe seguir el formato del ejemplo con las columnas: MENÚ, COMIDA 1, COMIDA 2, TIPO DE PAN, POSTRE
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Cargar y Revisar</button>
+                <a href="{{ url_for('importar.index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+    
+    <div class="alert alert-info mt-3">
+        <h6>Formato esperado del CSV:</h6>
+        <ul>
+            <li>Primera fila: MENÚ, COMIDA 1, COMIDA 2, TIPO DE PAN, POSTRE</li>
+            <li>COMIDA 1: Primer plato</li>
+            <li>COMIDA 2: Segundo plato</li>
+            <li>Filas siguientes: Datos de cada tipo de menú</li>
+        </ul>
+        <p class="mb-0"><strong>Ejemplo:</strong> semana1-almuerzo-jueves.csv</p>
+    </div>
+</div>
+{% endblock %}

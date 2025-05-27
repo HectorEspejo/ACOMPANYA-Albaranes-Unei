@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Revisar Menús - {{ dia }} Semana {{ semana }} - {{ comida }}</h2>
+    
+    <form method="POST" action="{{ url_for('importar.confirm_menus') }}">
+        <input type="hidden" name="semana" value="{{ semana }}">
+        <input type="hidden" name="dia" value="{{ dia }}">
+        <input type="hidden" name="comida" value="{{ comida }}">
+        <input type="hidden" name="menus_data" value="{{ menus_data }}">
+        
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Asignar Referencias a Platos</h5>
+                
+                <!-- Primeros Platos -->
+                {% if platos_unicos.primeros %}
+                <div class="mb-4">
+                    <h6>Primeros Platos</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Plato</th>
+                                    <th>Aparece en</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plato, info in platos_unicos.primeros.items() %}
+                                <tr>
+                                    <td><strong>{{ plato }}</strong></td>
+                                    <td>{{ info.count }} menús ({{ info.menus|join(', ') }})</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm ref-input" 
+                                               name="ref_primero_{{ plato|urlencode }}" 
+                                               data-plato="{{ plato }}"
+                                               data-tipo="primero"
+                                               placeholder="Ej: REF-001"
+                                               value="{{ referencias_sugeridas.get(plato, '') }}">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Segundos Platos -->
+                {% if platos_unicos.segundos %}
+                <div class="mb-4">
+                    <h6>Segundos Platos</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Plato</th>
+                                    <th>Aparece en</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plato, info in platos_unicos.segundos.items() %}
+                                <tr>
+                                    <td><strong>{{ plato }}</strong></td>
+                                    <td>{{ info.count }} menús ({{ info.menus|join(', ') }})</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm ref-input" 
+                                               name="ref_segundo_{{ plato|urlencode }}" 
+                                               data-plato="{{ plato }}"
+                                               data-tipo="segundo"
+                                               placeholder="Ej: REF-002"
+                                               value="{{ referencias_sugeridas.get(plato, '') }}">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Panes -->
+                {% if platos_unicos.panes %}
+                <div class="mb-4">
+                    <h6>Tipos de Pan</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Pan</th>
+                                    <th>Aparece en</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plato, info in platos_unicos.panes.items() %}
+                                <tr>
+                                    <td><strong>{{ plato }}</strong></td>
+                                    <td>{{ info.count }} menús ({{ info.menus|join(', ') }})</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm ref-input" 
+                                               name="ref_pan_{{ plato|urlencode }}" 
+                                               data-plato="{{ plato }}"
+                                               data-tipo="pan"
+                                               placeholder="Ej: PAN-001"
+                                               value="{{ referencias_sugeridas.get(plato, '') }}">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Postres -->
+                {% if platos_unicos.postres %}
+                <div class="mb-4">
+                    <h6>Postres</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Postre</th>
+                                    <th>Aparece en</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plato, info in platos_unicos.postres.items() %}
+                                <tr>
+                                    <td><strong>{{ plato }}</strong></td>
+                                    <td>{{ info.count }} menús ({{ info.menus|join(', ') }})</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm ref-input" 
+                                               name="ref_postre_{{ plato|urlencode }}" 
+                                               data-plato="{{ plato }}"
+                                               data-tipo="postre"
+                                               placeholder="Ej: POS-001"
+                                               value="{{ referencias_sugeridas.get(plato, '') }}">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-info">
+                    <p class="mb-2">Las referencias asignadas se aplicarán automáticamente a todos los menús donde aparezca cada plato.</p>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="autoAsignarReferencias()">
+                        Auto-asignar referencias
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mt-4">Resumen de Menús</h5>
+                <div class="accordion" id="menusAccordion">
+                    {% for menu in menus %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" 
+                                    aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                                {{ menu.tipo_menu }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
+                             aria-labelledby="heading{{ loop.index }}" data-bs-parent="#menusAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Primer plato:</strong> {{ menu.primer_plato or 'No especificado' }}</p>
+                                        <p><strong>Segundo plato:</strong> {{ menu.segundo_plato or 'No especificado' }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Pan:</strong> {{ menu.tipo_pan or 'No especificado' }}</p>
+                                        <p><strong>Postre:</strong> {{ menu.postre or 'No especificado' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Confirmar Importación</button>
+                    <a href="{{ url_for('importar.menus') }}" class="btn btn-secondary">Volver</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function autoAsignarReferencias() {
+    const prefijos = {
+        'primero': 'REF-',
+        'segundo': 'REF-',
+        'pan': 'PAN-',
+        'postre': 'POS-'
+    };
+    
+    const contadores = {
+        'primero': 1,
+        'segundo': 1,
+        'pan': 1,
+        'postre': 1
+    };
+    
+    // Asignar referencias automáticamente por tipo
+    document.querySelectorAll('.ref-input').forEach(input => {
+        if (!input.value) {
+            const tipo = input.dataset.tipo;
+            const prefijo = prefijos[tipo];
+            const numero = String(contadores[tipo]).padStart(3, '0');
+            input.value = prefijo + numero;
+            contadores[tipo]++;
+        }
+    });
+}
+</script>
+{% endblock %}

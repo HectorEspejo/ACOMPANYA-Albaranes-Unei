@@ -43,6 +43,30 @@
         </ul>
         <a href="{{ url_for('importar.importar_tipos_menu') }}" class="btn btn-info">Importar Tipos de Menú</a>
     </div>
+    
+    <div class="dashboard-card">
+        <h3>Importar Requisitos de Menú</h3>
+        <p>Importe requisitos de menú por cliente desde un archivo CSV para actualizar albaranes.</p>
+        <p><strong>Formato esperado:</strong></p>
+        <ul style="text-align: left; margin: 1rem 0;">
+            <li>Columna A: Nombre del cliente</li>
+            <li>Columna B: Tipo de menú (ej: "BASAL ALMUERZO")</li>
+            <li>Columnas C-I: Cantidades por día (L,M,X,J,V,S,D)</li>
+        </ul>
+        <a href="{{ url_for('importar.importar_requisitos_menu') }}" class="btn btn-warning">Importar Requisitos</a>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3>Importar Menús y Platos</h3>
+        <p>Importe menús completos con sus platos desde archivos CSV siguiendo el formato del ejemplo.</p>
+        <p><strong>Formato esperado:</strong></p>
+        <ul style="text-align: left; margin: 1rem 0;">
+            <li>Columnas: MENÚ, COMIDA (Primero), TOTAL, COMIDA (Segundo), TOTAL, TIPO DE PAN, POSTRE</li>
+            <li>Asigne referencias a platos repetidos</li>
+            <li>Especifique semana, día y tipo de comida</li>
+        </ul>
+        <a href="{{ url_for('importar.menus') }}" class="btn btn-primary">Importar Menús</a>
+    </div>
 </div>
 
 <div class="quick-actions" style="margin-top: 2rem;">
