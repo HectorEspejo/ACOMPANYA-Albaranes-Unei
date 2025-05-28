@@ -29,10 +29,12 @@
                     </div>
                     <div class="col-md-4">
                         <label for="comida" class="form-label">Tipo de Comida</label>
-                        <select class="form-control" id="comida" name="comida" required>
+                        <select class="form-control" id="comida" name="comida" required onchange="updateFormat()">
                             <option value="">Seleccione tipo de comida</option>
                             <option value="ALMUERZO">Almuerzo</option>
                             <option value="CENA">Cena</option>
+                            <option value="DESAYUNO">Desayuno</option>
+                            <option value="MERIENDA">Merienda</option>
                         </select>
                     </div>
                 </div>
@@ -51,8 +53,8 @@
         </div>
     </form>
     
-    <div class="alert alert-info mt-3">
-        <h6>Formato esperado del CSV:</h6>
+    <div class="alert alert-info mt-3" id="formato-almuerzo-cena">
+        <h6>Formato esperado del CSV para Almuerzo/Cena:</h6>
         <ul>
             <li>Primera fila: MENÚ, COMIDA 1, COMIDA 2, TIPO DE PAN, POSTRE</li>
             <li>COMIDA 1: Primer plato</li>
@@ -61,5 +63,31 @@
         </ul>
         <p class="mb-0"><strong>Ejemplo:</strong> semana1-almuerzo-jueves.csv</p>
     </div>
+    
+    <div class="alert alert-info mt-3" id="formato-desayuno" style="display: none;">
+        <h6>Formato esperado del CSV para Desayuno/Merienda:</h6>
+        <ul>
+            <li>Primera fila: MENÚ, ELEMENTO 1, ELEMENTO 2, ELEMENTO 3, ELEMENTO 4, ELEMENTO 5, ELEMENTO 6, ELEMENTO 7</li>
+            <li>ELEMENTO 1-7: Componentes del desayuno/merienda</li>
+            <li>Filas siguientes: Datos de cada tipo de menú</li>
+        </ul>
+        <p class="mb-0"><strong>Ejemplos:</strong> SEMANA 1 DESAYUNO JUEVES.csv o MERIENDA BASAL JUEVES S1.csv</p>
+    </div>
 </div>
+
+<script>
+function updateFormat() {
+    const comida = document.getElementById('comida').value;
+    const formatoAlmuerzoCena = document.getElementById('formato-almuerzo-cena');
+    const formatoDesayuno = document.getElementById('formato-desayuno');
+    
+    if (comida === 'DESAYUNO' || comida === 'MERIENDA') {
+        formatoAlmuerzoCena.style.display = 'none';
+        formatoDesayuno.style.display = 'block';
+    } else {
+        formatoAlmuerzoCena.style.display = 'block';
+        formatoDesayuno.style.display = 'none';
+    }
+}
+</script>
 {% endblock %}

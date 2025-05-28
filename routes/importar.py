@@ -635,11 +635,17 @@ def upload_menus():
             header = next(csv_reader)
             col_indices = {}
             comida_indices = []
+            elemento_indices = []
+            
+            # Check if this is a breakfast/snack format
+            is_elementos_format = comida.upper() in ['DESAYUNO', 'MERIENDA']
             
             for i, col in enumerate(header):
                 col_upper = col.upper().strip()
                 if col_upper == 'MENÚ':
                     col_indices['menu'] = i
+                elif is_elementos_format and col_upper.startswith('ELEMENTO'):
+                    elemento_indices.append(i)
                 elif col_upper == 'COMIDA' or col_upper == 'COMIDA 1' or col_upper == 'COMIDA 2':
                     comida_indices.append(i)
                     # Store specific indices for new format
@@ -661,6 +667,10 @@ def upload_menus():
             }
             referencias_sugeridas = {}
             
+            # Add elementos category for breakfast/snack
+            if is_elementos_format:
+                platos_unicos['elementos'] = {}
+            
             # Process menu rows
             for row in csv_reader:
                 if not row or len(row) < len(header):
@@ -668,58 +678,87 @@ def upload_menus():
                 
                 tipo_menu = row[col_indices.get('menu', 0)].strip() if col_indices.get('menu', 0) < len(row) else ''
                 
-                # Get both COMIDA columns
-                primer_plato = row[comida_indices[0]].strip() if len(comida_indices) > 0 and comida_indices[0] < len(row) else ''
-                segundo_plato = row[comida_indices[1]].strip() if len(comida_indices) > 1 and comida_indices[1] < len(row) else ''
-                tipo_pan = row[col_indices.get('pan', 3)].strip() if col_indices.get('pan', 3) < len(row) else ''
-                postre = row[col_indices.get('postre', 4)].strip() if col_indices.get('postre', 4) < len(row) else ''
-                
                 # Skip empty rows or rows without menu type
                 if not tipo_menu or not tipo_menu.strip():
                     continue
                 
-                # Skip rows without any dishes
-                if not primer_plato and not segundo_plato and not tipo_pan and not postre:
-                    continue
-                
-                # Track unique dishes by category
-                if primer_plato:
-                    if primer_plato not in platos_unicos['primeros']:
-                        platos_unicos['primeros'][primer_plato] = {'count': 0, 'menus': []}
-                    platos_unicos['primeros'][primer_plato]['count'] += 1
-                    platos_unicos['primeros'][primer_plato]['menus'].append(tipo_menu)
-                
-                if segundo_plato:
-                    if segundo_plato not in platos_unicos['segundos']:
-                        platos_unicos['segundos'][segundo_plato] = {'count': 0, 'menus': []}
-                    platos_unicos['segundos'][segundo_plato]['count'] += 1
-                    platos_unicos['segundos'][segundo_plato]['menus'].append(tipo_menu)
+                if is_elementos_format:
+                    # Process breakfast/snack format
+                    elementos = []
+                    for idx in elemento_indices:
+                        if idx < len(row):
+                            elemento = row[idx].strip()
+                            if elemento:
+                                elementos.append(elemento)
+                                # Track unique elements
+                                if elemento not in platos_unicos['elementos']:
+                                    platos_unicos['elementos'][elemento] = {'count': 0, 'menus': []}
+                                platos_unicos['elementos'][elemento]['count'] += 1
+                                platos_unicos['elementos'][elemento]['menus'].append(tipo_menu)
                     
-                
-                if tipo_pan:
-                    if tipo_pan not in platos_unicos['panes']:
-                        platos_unicos['panes'][tipo_pan] = {'count': 0, 'menus': []}
-                    platos_unicos['panes'][tipo_pan]['count'] += 1
-                    platos_unicos['panes'][tipo_pan]['menus'].append(tipo_menu)
-                
-                if postre:
-                    if postre not in platos_unicos['postres']:
-                        platos_unicos['postres'][postre] = {'count': 0, 'menus': []}
-                    platos_unicos['postres'][postre]['count'] += 1
-                    platos_unicos['postres'][postre]['menus'].append(tipo_menu)
-                
-                menus.append({
-                    'tipo_menu': tipo_menu,
-                    'primer_plato': primer_plato,
-                    'segundo_plato': segundo_plato,
-                    'tipo_pan': tipo_pan,
-                    'postre': postre,
-                    'cantidad': 0  # Default quantity, will be set from the menu requirements import
-                })
+                    # Skip if no elements
+                    if not elementos:
+                        continue
+                    
+                    menus.append({
+                        'tipo_menu': tipo_menu,
+                        'elementos': elementos,
+                        'cantidad': 0,
+                        # Add empty fields for compatibility
+                        'primer_plato': '',
+                        'segundo_plato': '',
+                        'tipo_pan': '',
+                        'postre': ''
+                    })
+                else:
+                    # Process lunch/dinner format
+                    primer_plato = row[comida_indices[0]].strip() if len(comida_indices) > 0 and comida_indices[0] < len(row) else ''
+                    segundo_plato = row[comida_indices[1]].strip() if len(comida_indices) > 1 and comida_indices[1] < len(row) else ''
+                    tipo_pan = row[col_indices.get('pan', 3)].strip() if col_indices.get('pan', 3) < len(row) else ''
+                    postre = row[col_indices.get('postre', 4)].strip() if col_indices.get('postre', 4) < len(row) else ''
+                    
+                    # Skip rows without any dishes
+                    if not primer_plato and not segundo_plato and not tipo_pan and not postre:
+                        continue
+                    
+                    # Track unique dishes by category
+                    if primer_plato:
+                        if primer_plato not in platos_unicos['primeros']:
+                            platos_unicos['primeros'][primer_plato] = {'count': 0, 'menus': []}
+                        platos_unicos['primeros'][primer_plato]['count'] += 1
+                        platos_unicos['primeros'][primer_plato]['menus'].append(tipo_menu)
+                    
+                    if segundo_plato:
+                        if segundo_plato not in platos_unicos['segundos']:
+                            platos_unicos['segundos'][segundo_plato] = {'count': 0, 'menus': []}
+                        platos_unicos['segundos'][segundo_plato]['count'] += 1
+                        platos_unicos['segundos'][segundo_plato]['menus'].append(tipo_menu)
+                        
+                    
+                    if tipo_pan:
+                        if tipo_pan not in platos_unicos['panes']:
+                            platos_unicos['panes'][tipo_pan] = {'count': 0, 'menus': []}
+                        platos_unicos['panes'][tipo_pan]['count'] += 1
+                        platos_unicos['panes'][tipo_pan]['menus'].append(tipo_menu)
+                    
+                    if postre:
+                        if postre not in platos_unicos['postres']:
+                            platos_unicos['postres'][postre] = {'count': 0, 'menus': []}
+                        platos_unicos['postres'][postre]['count'] += 1
+                        platos_unicos['postres'][postre]['menus'].append(tipo_menu)
+                    
+                    menus.append({
+                        'tipo_menu': tipo_menu,
+                        'primer_plato': primer_plato,
+                        'segundo_plato': segundo_plato,
+                        'tipo_pan': tipo_pan,
+                        'postre': postre,
+                        'cantidad': 0  # Default quantity, will be set from the menu requirements import
+                    })
             
             # Generate suggested references for repeated dishes
-            ref_counters = {'primeros': 1, 'segundos': 1, 'panes': 1, 'postres': 1}
-            prefijos = {'primeros': 'REF-', 'segundos': 'REF-', 'panes': 'PAN-', 'postres': 'POS-'}
+            ref_counters = {'primeros': 1, 'segundos': 1, 'panes': 1, 'postres': 1, 'elementos': 1}
+            prefijos = {'primeros': 'REF-', 'segundos': 'REF-', 'panes': 'PAN-', 'postres': 'POS-', 'elementos': 'ELEM-'}
             
             for categoria, platos in platos_unicos.items():
                 for plato, info in platos.items():
@@ -793,7 +832,8 @@ def confirm_menus():
         'primeros': {},
         'segundos': {},
         'panes': {},
-        'postres': {}
+        'postres': {},
+        'elementos': {}
     }
     
     # Debug form data
@@ -819,6 +859,9 @@ def confirm_menus():
         elif key.startswith('ref_postre_'):
             plato_name = unquote(key.replace('ref_postre_', ''))
             referencias['postres'][plato_name] = request.form.get(key, '')
+        elif key.startswith('ref_elemento_'):
+            plato_name = unquote(key.replace('ref_elemento_', ''))
+            referencias['elementos'][plato_name] = request.form.get(key, '')
     
     try:
         # Convert to enums
@@ -834,7 +877,8 @@ def confirm_menus():
             'primeros': {},
             'segundos': {},
             'panes': {},
-            'postres': {}
+            'postres': {},
+            'elementos': {}
         }
         
         # Debug
@@ -879,8 +923,46 @@ def confirm_menus():
             # Process dishes
             platos_menu = []
             
-            # First dish
-            if menu_data['primer_plato']:
+            # Check if this is a breakfast/snack menu
+            if 'elementos' in menu_data:
+                # Process breakfast/snack elements
+                for elemento in menu_data['elementos']:
+                    ref_elemento = referencias['elementos'].get(elemento, '')
+                    
+                    # Check if we already created a dish with this reference
+                    if ref_elemento and ref_elemento in platos_por_referencia['elementos']:
+                        plato_elemento = platos_por_referencia['elementos'][ref_elemento]
+                    else:
+                        # Find or create dish by name or reference
+                        if ref_elemento:
+                            plato_elemento = Plato.query.filter(
+                                (Plato.nombre == elemento) | 
+                                (Plato.lote_propio == ref_elemento)
+                            ).first()
+                        else:
+                            plato_elemento = Plato.query.filter_by(nombre=elemento).first()
+                        
+                        if not plato_elemento:
+                            plato_elemento = Plato(
+                                nombre=elemento,
+                                lote_propio=ref_elemento if ref_elemento else None,
+                                stock_actual=0,
+                                unidad='unidades'
+                            )
+                            db.session.add(plato_elemento)
+                            db.session.flush()
+                            platos_creados += 1
+                        elif ref_elemento and not plato_elemento.lote_propio:
+                            plato_elemento.lote_propio = ref_elemento
+                            platos_actualizados += 1
+                        
+                        if ref_elemento:
+                            platos_por_referencia['elementos'][ref_elemento] = plato_elemento
+                    
+                    platos_menu.append((plato_elemento, 1, 'elemento'))
+            
+            # First dish (for lunch/dinner)
+            elif menu_data.get('primer_plato'):
                 ref_primero = referencias['primeros'].get(menu_data['primer_plato'], '')
                 
                 # Check if we already created a dish with this reference
@@ -986,7 +1068,7 @@ def confirm_menus():
                 
             
             # Bread
-            if menu_data['tipo_pan']:
+            if menu_data.get('tipo_pan'):
                 ref_pan = referencias['panes'].get(menu_data['tipo_pan'], '')
                 
                 # Check if we already created a dish with this reference
@@ -1022,7 +1104,7 @@ def confirm_menus():
                 platos_menu.append((plato_pan, 1, 'pan'))
             
             # Dessert
-            if menu_data['postre']:
+            if menu_data.get('postre'):
                 ref_postre = referencias['postres'].get(menu_data['postre'], '')
                 
                 # Check if we already created a dish with this reference

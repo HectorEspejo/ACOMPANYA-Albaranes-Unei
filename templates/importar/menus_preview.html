@@ -14,6 +14,40 @@
             <div class="card-body">
                 <h5 class="card-title">Asignar Referencias a Platos</h5>
                 
+                <!-- Elementos de Desayuno -->
+                {% if platos_unicos.elementos %}
+                <div class="mb-4">
+                    <h6>Elementos de {{ comida|capitalize }}</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Elemento</th>
+                                    <th>Aparece en</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for elemento, info in platos_unicos.elementos.items() %}
+                                <tr>
+                                    <td><strong>{{ elemento }}</strong></td>
+                                    <td>{{ info.count }} menús ({{ info.menus|join(', ') }})</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm ref-input" 
+                                               name="ref_elemento_{{ elemento|urlencode }}" 
+                                               data-plato="{{ elemento }}"
+                                               data-tipo="elemento"
+                                               placeholder="Ej: ELEM-001"
+                                               value="{{ referencias_sugeridas.get(elemento, '') }}">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <!-- Primeros Platos -->
                 {% if platos_unicos.primeros %}
                 <div class="mb-4">
@@ -173,16 +207,31 @@
                         <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
                              aria-labelledby="heading{{ loop.index }}" data-bs-parent="#menusAccordion">
                             <div class="accordion-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>Primer plato:</strong> {{ menu.primer_plato or 'No especificado' }}</p>
-                                        <p><strong>Segundo plato:</strong> {{ menu.segundo_plato or 'No especificado' }}</p>
+                                {% if menu.elementos %}
+                                    <!-- Formato de desayuno/merienda -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <p><strong>Elementos del {{ comida|lower }}:</strong></p>
+                                            <ul>
+                                                {% for elemento in menu.elementos %}
+                                                <li>{{ elemento }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Pan:</strong> {{ menu.tipo_pan or 'No especificado' }}</p>
-                                        <p><strong>Postre:</strong> {{ menu.postre or 'No especificado' }}</p>
+                                {% else %}
+                                    <!-- Formato de almuerzo/cena -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Primer plato:</strong> {{ menu.primer_plato or 'No especificado' }}</p>
+                                            <p><strong>Segundo plato:</strong> {{ menu.segundo_plato or 'No especificado' }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Pan:</strong> {{ menu.tipo_pan or 'No especificado' }}</p>
+                                            <p><strong>Postre:</strong> {{ menu.postre or 'No especificado' }}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -204,14 +253,16 @@ function autoAsignarReferencias() {
         'primero': 'REF-',
         'segundo': 'REF-',
         'pan': 'PAN-',
-        'postre': 'POS-'
+        'postre': 'POS-',
+        'elemento': 'ELEM-'
     };
     
     const contadores = {
         'primero': 1,
         'segundo': 1,
         'pan': 1,
-        'postre': 1
+        'postre': 1,
+        'elemento': 1
     };
     
     // Asignar referencias automáticamente por tipo
