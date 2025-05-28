@@ -21,4 +21,4 @@ class Config:
     EXPIRY_ALERT_DAYS = 7  # Alert when expiry is within this many days
     
     # Debug mode - bypasses stock verification
-    DEBUG_MODE = os.environ.get('DEBUG_MODE', 'False').lower() in ['true', '1', 'yes']
+    DEBUG_MODE = os.environ.get('DEBUG_MODE', 'True').lower() in ['true', '1', 'yes']

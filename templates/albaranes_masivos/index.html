@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Generación Masiva de Albaranes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Generación Masiva de Albaranes</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sistema de Generación Automática</h5>
+                    <p class="card-text">
+                        Este sistema permite generar albaranes de forma masiva a partir de un archivo CSV con los requisitos de menús para cada cliente.
+                    </p>
+                    
+                    <h6 class="mt-4">Formato del archivo CSV:</h6>
+                    <ul>
+                        <li><strong>Columna A:</strong> Nombre del cliente (en filas separadas)</li>
+                        <li><strong>Columna B:</strong> Tipo de menú (ej: BASAL INDIVIDUAL ALMUERZO)</li>
+                        <li><strong>Columnas C-I:</strong> Cantidades para cada día (L, M, X, J, V, S, D)</li>
+                    </ul>
+                    
+                    <h6 class="mt-4">Funcionamiento:</h6>
+                    <ol>
+                        <li>El sistema leerá el archivo CSV</li>
+                        <li>Creará o buscará los clientes especificados</li>
+                        <li>Generará albaranes para 4 semanas completas</li>
+                        <li>Asignará los menús correspondientes según el tipo de dieta y comida</li>
+                    </ol>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('albaranes_masivos.generar') }}" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Cargar archivo y generar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

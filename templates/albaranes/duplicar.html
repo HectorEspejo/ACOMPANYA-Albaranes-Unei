@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Duplicar Albarán{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Duplicar Albarán {{ albaran.referencia }}</h2>
+</div>
+
+<div class="info-panel">
+    <h4>Información del albarán original</h4>
+    <div class="albaran-info">
+        <div><strong>Referencia:</strong> {{ albaran.referencia }}</div>
+        <div><strong>Fecha:</strong> {{ albaran.fecha.strftime('%d/%m/%Y') }}</div>
+        {% if albaran.cliente %}
+        <div><strong>Cliente:</strong> {{ albaran.cliente.nombre }}</div>
+        {% endif %}
+        {% if semana_original and dia_original %}
+        <div><strong>Semana:</strong> {{ semana_original }}</div>
+        <div><strong>Día:</strong> {{ dia_original|title }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-section">
+    <h4>Seleccionar destino para la duplicación</h4>
+    
+    <form method="POST" id="duplicarForm">
+        <div class="form-group">
+            <label for="semana_destino">Número de semana destino:</label>
+            <input type="number" class="form-control" id="semana_destino" name="semana_destino" 
+                   min="1" max="52" value="{{ semana_original or 1 }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="dia_destino">Día de la semana destino:</label>
+            <select class="form-control" id="dia_destino" name="dia_destino" required>
+                <option value="">-- Seleccionar día --</option>
+                <option value="lunes" {% if dia_original == 'lunes' %}selected{% endif %}>Lunes</option>
+                <option value="martes" {% if dia_original == 'martes' %}selected{% endif %}>Martes</option>
+                <option value="miercoles" {% if dia_original == 'miercoles' %}selected{% endif %}>Miércoles</option>
+                <option value="jueves" {% if dia_original == 'jueves' %}selected{% endif %}>Jueves</option>
+                <option value="viernes" {% if dia_original == 'viernes' %}selected{% endif %}>Viernes</option>
+                <option value="sabado" {% if dia_original == 'sabado' %}selected{% endif %}>Sábado</option>
+                <option value="domingo" {% if dia_original == 'domingo' %}selected{% endif %}>Domingo</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="fecha_destino">Fecha del nuevo albarán:</label>
+            <input type="date" class="form-control" id="fecha_destino" name="fecha_destino" 
+                   value="{{ albaran.fecha }}" required>
+        </div>
+        
+        <div id="verificacion-menus" class="alert alert-info" style="display: none;">
+            <h5>Verificando disponibilidad de menús...</h5>
+            <div id="resultado-verificacion"></div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-info" onclick="verificarMenus()">Verificar disponibilidad</button>
+            <button type="submit" class="btn btn-success" id="btnDuplicar">Duplicar albarán</button>
+            <a href="{{ url_for('albaranes.ver', id=albaran.id) }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<div class="menus-originales">
+    <h4>Menús en el albarán original</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Menú</th>
+                <th>Tipo</th>
+                <th>Semana</th>
+                <th>Día</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set menus_procesados = [] %}
+            {% for detalle in albaran.detalles %}
+                {% if detalle.menu_id and detalle.menu_id not in menus_procesados %}
+                    {% if menus_procesados.append(detalle.menu_id) %}{% endif %}
+                    <tr>
+                        <td>{{ detalle.menu.nombre }}</td>
+                        <td>{{ detalle.menu.tipo_comida.value|title }}</td>
+                        <td>{{ detalle.menu.numero_semana }}</td>
+                        <td>{{ detalle.menu.dia_semana.value|title }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.info-panel {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 5px;
+    margin-bottom: 2rem;
+}
+
+.albaran-info div {
+    margin: 0.5rem 0;
+}
+
+.form-section {
+    margin: 2rem 0;
+}
+
+.menus-originales {
+    margin-top: 3rem;
+}
+
+.form-actions {
+    margin-top: 2rem;
+}
+
+.menu-encontrado {
+    color: #28a745;
+    margin: 0.5rem 0;
+}
+
+.menu-faltante {
+    color: #dc3545;
+    margin: 0.5rem 0;
+}
+</style>
+
+<script>
+function verificarMenus() {
+    const semana = document.getElementById('semana_destino').value;
+    const dia = document.getElementById('dia_destino').value;
+    
+    if (!semana || !dia) {
+        alert('Por favor seleccione semana y día destino');
+        return;
+    }
+    
+    const verificacionDiv = document.getElementById('verificacion-menus');
+    const resultadoDiv = document.getElementById('resultado-verificacion');
+    
+    verificacionDiv.style.display = 'block';
+    resultadoDiv.innerHTML = '<p>Verificando...</p>';
+    
+    fetch('{{ url_for("albaranes.api_verificar_menus") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            albaran_id: {{ albaran.id }},
+            semana_destino: parseInt(semana),
+            dia_destino: dia
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        
+        if (data.menus_encontrados.length > 0) {
+            html += '<h6>Menús encontrados:</h6>';
+            data.menus_encontrados.forEach(menu => {
+                html += `<div class="menu-encontrado">✓ ${menu.original} → ${menu.destino}</div>`;
+            });
+        }
+        
+        if (data.menus_faltantes.length > 0) {
+            html += '<h6 class="mt-3">Menús NO encontrados:</h6>';
+            data.menus_faltantes.forEach(menu => {
+                html += `<div class="menu-faltante">✗ ${menu.nombre} (${menu.tipo_comida} - ${menu.tipo_dieta})</div>`;
+            });
+            html += '<p class="alert alert-warning mt-2">Estos menús no se duplicarán. Debe crearlos primero para la semana y día seleccionados.</p>';
+        }
+        
+        if (data.puede_duplicar) {
+            verificacionDiv.className = 'alert alert-success';
+            html += '<p class="mt-2"><strong>Todos los menús están disponibles. Puede proceder con la duplicación.</strong></p>';
+        } else {
+            verificacionDiv.className = 'alert alert-warning';
+        }
+        
+        resultadoDiv.innerHTML = html;
+    })
+    .catch(error => {
+        verificacionDiv.className = 'alert alert-danger';
+        resultadoDiv.innerHTML = '<p>Error al verificar menús: ' + error + '</p>';
+    });
+}
+
+// Verificar automáticamente cuando cambian los valores
+document.getElementById('semana_destino').addEventListener('change', function() {
+    if (document.getElementById('dia_destino').value) {
+        verificarMenus();
+    }
+});
+
+document.getElementById('dia_destino').addEventListener('change', function() {
+    if (document.getElementById('semana_destino').value) {
+        verificarMenus();
+    }
+});
+</script>
+{% endblock %}

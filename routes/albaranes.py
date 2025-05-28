@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, Response, jsonify
 from database import db
-from database.models import Albaran, AlbaranDetalle, Menu, Plato, Cliente
+from database.models import Albaran, AlbaranDetalle, Menu, Plato, Cliente, DiaSemana
 from datetime import datetime
 from collections import defaultdict
 import csv
@@ -457,3 +457,176 @@ def api_menu_platos(menu_id):
         })
     
     return {'platos': platos_data}
+
+@albaranes_bp.route('/duplicar/<int:id>', methods=['GET', 'POST'])
+def duplicar(id):
+    albaran_original = Albaran.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            # Get target week and day
+            semana_destino = int(request.form.get('semana_destino'))
+            dia_destino = request.form.get('dia_destino')
+            fecha_destino = datetime.strptime(request.form.get('fecha_destino'), '%Y-%m-%d').date()
+            
+            # Create new albaran
+            nuevo_albaran = Albaran(
+                referencia=Albaran.generar_referencia(),
+                destinatario=albaran_original.destinatario,
+                cliente_id=albaran_original.cliente_id,
+                fecha=fecha_destino
+            )
+            
+            db.session.add(nuevo_albaran)
+            db.session.flush()
+            
+            # Track warnings for menus not found
+            warnings = []
+            
+            # Group details by menu to avoid duplicating menu processing
+            menus_procesados = {}
+            detalles_individuales = []
+            
+            for detalle_original in albaran_original.detalles:
+                if detalle_original.menu_id:
+                    if detalle_original.menu_id not in menus_procesados:
+                        menus_procesados[detalle_original.menu_id] = detalle_original
+                else:
+                    detalles_individuales.append(detalle_original)
+            
+            # Process menus (only once per menu)
+            for menu_id, detalle_original in menus_procesados.items():
+                menu_original = detalle_original.menu
+                
+                # Find corresponding menu for the target week and day
+                menu_destino = Menu.query.filter_by(
+                    tipo_dieta=menu_original.tipo_dieta,
+                    tipo_comida=menu_original.tipo_comida,
+                    numero_semana=semana_destino,
+                    dia_semana=DiaSemana(dia_destino)
+                ).first()
+                
+                if menu_destino:
+                    # Calculate quantity of menus from original
+                    platos_menu_original = menu_original.obtener_platos_con_cantidad()
+                    if platos_menu_original:
+                        primera_cantidad = platos_menu_original[0][1]
+                        if primera_cantidad > 0:
+                            cantidad_menus = int(detalle_original.cantidad_entregada / primera_cantidad)
+                            
+                            # Add dishes from destination menu
+                            for plato, cantidad_plato in menu_destino.obtener_platos_con_cantidad():
+                                lotes = ', '.join(plato.obtener_lotes_trazabilidad())
+                                
+                                nuevo_detalle = AlbaranDetalle(
+                                    albaran_id=nuevo_albaran.id,
+                                    menu_id=menu_destino.id,
+                                    plato_id=plato.id,
+                                    cantidad_entregada=cantidad_plato * cantidad_menus,
+                                    unidad=plato.unidad,
+                                    lote=lotes
+                                )
+                                db.session.add(nuevo_detalle)
+                            
+                            # Update stock
+                            menu_destino.preparar_menu(cantidad_menus)
+                else:
+                    # Menu not found for target day/week
+                    warnings.append(f"No se encontró el menú '{menu_original.nombre}' para la semana {semana_destino} y día {dia_destino}")
+            
+            # Process individual dishes
+            for detalle_original in detalles_individuales:
+                plato = detalle_original.plato
+                lotes = ', '.join(plato.obtener_lotes_trazabilidad())
+                
+                nuevo_detalle = AlbaranDetalle(
+                    albaran_id=nuevo_albaran.id,
+                    menu_id=None,
+                    plato_id=plato.id,
+                    cantidad_entregada=detalle_original.cantidad_entregada,
+                    unidad=plato.unidad,
+                    lote=lotes
+                )
+                db.session.add(nuevo_detalle)
+                
+                # Update stock
+                plato.stock_actual -= detalle_original.cantidad_entregada
+            
+            db.session.commit()
+            
+            # Show warnings if any
+            for warning in warnings:
+                flash(warning, 'warning')
+            
+            if not warnings:
+                flash('Albarán duplicado exitosamente', 'success')
+            else:
+                flash('Albarán duplicado con advertencias', 'info')
+                
+            return redirect(url_for('albaranes.ver', id=nuevo_albaran.id))
+            
+        except Exception as e:
+            flash(f'Error al duplicar albarán: {str(e)}', 'danger')
+            db.session.rollback()
+            return redirect(url_for('albaranes.duplicar', id=id))
+    
+    # GET request - show duplication form
+    # Analyze original albaran to extract week and day info
+    semana_original = None
+    dia_original = None
+    
+    for detalle in albaran_original.detalles:
+        if detalle.menu_id:
+            semana_original = detalle.menu.numero_semana
+            dia_original = detalle.menu.dia_semana.value
+            break
+    
+    return render_template('albaranes/duplicar.html',
+                         albaran=albaran_original,
+                         semana_original=semana_original,
+                         dia_original=dia_original)
+
+@albaranes_bp.route('/api/verificar-menus', methods=['POST'])
+def api_verificar_menus():
+    """Verify if menus exist for target week and day"""
+    data = request.get_json()
+    albaran_id = data.get('albaran_id')
+    semana_destino = data.get('semana_destino')
+    dia_destino = data.get('dia_destino')
+    
+    albaran = Albaran.query.get_or_404(albaran_id)
+    menus_faltantes = []
+    menus_encontrados = []
+    
+    # Check each menu in the original albaran
+    menus_procesados = set()
+    for detalle in albaran.detalles:
+        if detalle.menu_id and detalle.menu_id not in menus_procesados:
+            menus_procesados.add(detalle.menu_id)
+            menu_original = detalle.menu
+            
+            # Look for corresponding menu
+            menu_destino = Menu.query.filter_by(
+                tipo_dieta=menu_original.tipo_dieta,
+                tipo_comida=menu_original.tipo_comida,
+                numero_semana=semana_destino,
+                dia_semana=DiaSemana(dia_destino)
+            ).first()
+            
+            if menu_destino:
+                menus_encontrados.append({
+                    'original': menu_original.nombre,
+                    'destino': menu_destino.nombre
+                })
+            else:
+                menus_faltantes.append({
+                    'nombre': menu_original.nombre,
+                    'tipo_dieta': menu_original.tipo_dieta,
+                    'tipo_comida': menu_original.tipo_comida.value
+                })
+    
+    return jsonify({
+        'menus_faltantes': menus_faltantes,
+        'menus_encontrados': menus_encontrados,
+        'puede_duplicar': len(menus_faltantes) == 0
+    })

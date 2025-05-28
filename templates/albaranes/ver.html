@@ -7,6 +7,7 @@
     <h2>Albarán {{ albaran.referencia }}</h2>
     <div class="action-group">
         <a href="{{ url_for('albaranes.editar', id=albaran.id) }}" class="btn btn-warning">Editar</a>
+        <a href="{{ url_for('albaranes.duplicar', id=albaran.id) }}" class="btn btn-secondary">Duplicar albarán</a>
         <a href="{{ url_for('albaranes.imprimir', id=albaran.id) }}" class="btn btn-info" target="_blank">Imprimir</a>
         <a href="{{ url_for('albaranes.exportar_csv', id=albaran.id) }}" class="btn btn-success">Exportar CSV</a>
         <a href="{{ url_for('albaranes.listar') }}" class="btn btn-primary">Volver</a>

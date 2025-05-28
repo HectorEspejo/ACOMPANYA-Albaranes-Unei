@@ -69,13 +69,17 @@
 {% if menus.has_prev or menus.has_next %}
 <div class="pagination">
     {% if menus.has_prev %}
-        <a href="{{ url_for('menus.listar', page=menus.prev_num, **request.args) }}">← Anterior</a>
+        {% set args = dict(request.args) %}
+        {% if 'page' in args %}{% set _ = args.pop('page') %}{% endif %}
+        <a href="{{ url_for('menus.listar', page=menus.prev_num, **args) }}">← Anterior</a>
     {% endif %}
     
     <span class="active">Página {{ menus.page }} de {{ menus.pages }}</span>
     
     {% if menus.has_next %}
-        <a href="{{ url_for('menus.listar', page=menus.next_num, **request.args) }}">Siguiente →</a>
+        {% set args = dict(request.args) %}
+        {% if 'page' in args %}{% set _ = args.pop('page') %}{% endif %}
+        <a href="{{ url_for('menus.listar', page=menus.next_num, **args) }}">Siguiente →</a>
     {% endif %}
 </div>
 {% endif %}
