@@ -1,0 +1,25 @@
+[Unit]
+Description=Alabaranes UNEI Flask Application (Development)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/alabaranes-unei
+Environment=PATH=/opt/alabaranes-unei/venv/bin
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=development
+Environment=SECRET_KEY=dev-secret-key-change-in-production
+Environment=DATABASE_URL=sqlite:////opt/alabaranes-unei/database/database.db
+Environment=DEBUG_MODE=True
+ExecStart=/opt/alabaranes-unei/venv/bin/python app.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=alabaranes-unei-dev
+
+[Install]
+WantedBy=multi-user.target 

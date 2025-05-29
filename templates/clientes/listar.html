@@ -72,13 +72,13 @@
 {% if clientes.has_prev or clientes.has_next %}
 <div class="pagination">
     {% if clientes.has_prev %}
-        <a href="{{ url_for('clientes.listar', page=clientes.prev_num, **request.args) }}">← Anterior</a>
+        <a href="{{ url_for('clientes.listar', page=clientes.prev_num, busqueda=request.args.get('busqueda', ''), ciudad=request.args.get('ciudad', '')) }}">← Anterior</a>
     {% endif %}
     
     <span class="active">Página {{ clientes.page }} de {{ clientes.pages }}</span>
     
     {% if clientes.has_next %}
-        <a href="{{ url_for('clientes.listar', page=clientes.next_num, **request.args) }}">Siguiente →</a>
+        <a href="{{ url_for('clientes.listar', page=clientes.next_num, busqueda=request.args.get('busqueda', ''), ciudad=request.args.get('ciudad', '')) }}">Siguiente →</a>
     {% endif %}
 </div>
 {% endif %}

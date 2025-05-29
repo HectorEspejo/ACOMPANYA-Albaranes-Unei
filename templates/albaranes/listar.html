@@ -80,13 +80,13 @@
 {% if albaranes.has_prev or albaranes.has_next %}
 <div class="pagination">
     {% if albaranes.has_prev %}
-        <a href="{{ url_for('albaranes.listar', page=albaranes.prev_num, **request.args) }}">← Anterior</a>
+        <a href="{{ url_for('albaranes.listar', page=albaranes.prev_num, fecha_desde=request.args.get('fecha_desde', ''), fecha_hasta=request.args.get('fecha_hasta', '')) }}">← Anterior</a>
     {% endif %}
     
     <span class="active">Página {{ albaranes.page }} de {{ albaranes.pages }}</span>
     
     {% if albaranes.has_next %}
-        <a href="{{ url_for('albaranes.listar', page=albaranes.next_num, **request.args) }}">Siguiente →</a>
+        <a href="{{ url_for('albaranes.listar', page=albaranes.next_num, fecha_desde=request.args.get('fecha_desde', ''), fecha_hasta=request.args.get('fecha_hasta', '')) }}">Siguiente →</a>
     {% endif %}
 </div>
 {% endif %}
