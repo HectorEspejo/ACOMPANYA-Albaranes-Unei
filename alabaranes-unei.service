@@ -22,4 +22,4 @@ StandardError=syslog
 SyslogIdentifier=alabaranes-unei-dev
 
 [Install]
-WantedBy=multi-user.target 
+WantedBy=multi-user.target

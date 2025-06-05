@@ -361,46 +361,54 @@ def exportar_multiple_csv():
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Write table headers only once
-    writer.writerow(['PRODUCTO', 'UNIDADES', 'REFERENCIA'])
-    
     # Process each albaran
-    for albaran in albaranes:
-        # Organize details by menu
-        detalles_por_menu = defaultdict(list)
-        detalles_individuales = []
+    for i, albaran in enumerate(albaranes):
+        # Add blank line between albarans except for the first one
+        if i > 0:
+            writer.writerow([])
+        
+        # Write header
+        writer.writerow(['Referencia', 'Fecha', 'Cliente', 'Ciudad', 'Destinatario'])
+        
+        # Write albaran info
+        cliente_info = albaran.cliente.nombre if albaran.cliente else ''
+        ciudad_info = albaran.cliente.ciudad if albaran.cliente else ''
+        destinatario_info = albaran.destinatario if albaran.destinatario else ''
+        
+        # Create a combined destinatario field that includes client info
+        if albaran.cliente and destinatario_info:
+            destinatario_completo = f"{cliente_info}, {destinatario_info} - {ciudad_info}"
+        elif destinatario_info:
+            destinatario_completo = destinatario_info
+        else:
+            destinatario_completo = ''
+        
+        writer.writerow([
+            albaran.referencia,
+            albaran.fecha.strftime('%d/%m/%Y'),
+            cliente_info,
+            destinatario_info,
+            ciudad_info,
+            destinatario_completo
+        ])
+        
+        # Write units header
+        writer.writerow(['Unidades', 'Menú'])
+        
+        # Group details by menu and count quantities
+        menu_counts = defaultdict(float)
         
         for detalle in albaran.detalles:
             if detalle.menu_id:
-                detalles_por_menu[detalle.menu].append(detalle)
-            else:
-                detalles_individuales.append(detalle)
+                menu = detalle.menu
+                # Format: tipo_dieta + S + numero_semana + dia_semana + tipo_comida + dia_semana_upper + tipo_comida_upper + tipo_dieta
+                menu_key = f"{menu.tipo_dieta.upper()} S{menu.numero_semana} {menu.dia_semana.value.capitalize()} {menu.tipo_comida.value.capitalize()} {menu.dia_semana.value.upper()} {menu.tipo_comida.value.upper()} {menu.tipo_dieta.upper()}"
+                menu_counts[menu_key] += detalle.cantidad_entregada
         
-        # Write menu details
-        for menu, detalles in detalles_por_menu.items():
-            # Format: nombre + dia_semana + tipo_comida + tipo_dieta
-            menu_name = f'** {menu.nombre} {menu.dia_semana.value.upper()} {menu.tipo_comida.value.upper()} {menu.tipo_dieta}'
-            writer.writerow([menu_name, '', ''])
-            for detalle in detalles:
-                # Extract only the plate's lot (not ingredient lots)
-                plato_lote = detalle.plato.lote_propio or ''
-                writer.writerow([
-                    detalle.plato.nombre,
-                    str(int(detalle.cantidad_entregada)) if detalle.cantidad_entregada.is_integer() else str(detalle.cantidad_entregada),
-                    plato_lote
-                ])
-        
-        # Write individual dishes
-        if detalles_individuales:
-            writer.writerow(['** PLATOS INDIVIDUALES', '', ''])
-            for detalle in detalles_individuales:
-                # Extract only the plate's lot (not ingredient lots)
-                plato_lote = detalle.plato.lote_propio or ''
-                writer.writerow([
-                    detalle.plato.nombre,
-                    str(int(detalle.cantidad_entregada)) if detalle.cantidad_entregada.is_integer() else str(detalle.cantidad_entregada),
-                    plato_lote
-                ])
+        # Write menu quantities
+        for menu_name, cantidad in menu_counts.items():
+            cantidad_str = str(int(cantidad)) if cantidad.is_integer() else str(cantidad)
+            writer.writerow([f"{cantidad_str} Uds. ** {menu_name}", '', ''])
     
     # Prepare response
     output.seek(0)
