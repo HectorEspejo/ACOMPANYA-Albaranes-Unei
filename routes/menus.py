@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required
 from database import db
 from database.models import Menu, Plato, DiaSemana, TipoComida, menus_platos
 from sqlalchemy import insert
@@ -6,6 +7,7 @@ from sqlalchemy import insert
 menus_bp = Blueprint('menus', __name__)
 
 @menus_bp.route('/')
+@login_required
 def listar():
     page = request.args.get('page', 1, type=int)
     semana = request.args.get('semana', type=int)
@@ -23,6 +25,7 @@ def listar():
     return render_template('menus/listar.html', menus=menus)
 
 @menus_bp.route('/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo():
     if request.method == 'POST':
         try:
@@ -65,6 +68,7 @@ def nuevo():
                          tipos_comida=TipoComida)
 
 @menus_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     menu = Menu.query.get_or_404(id)
     
@@ -109,6 +113,7 @@ def editar(id):
                          tipos_comida=TipoComida)
 
 @menus_bp.route('/eliminar/<int:id>', methods=['POST'])
+@login_required
 def eliminar(id):
     menu = Menu.query.get_or_404(id)
     try:
@@ -122,6 +127,7 @@ def eliminar(id):
     return redirect(url_for('menus.listar'))
 
 @menus_bp.route('/preparar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def preparar(id):
     menu = Menu.query.get_or_404(id)
     
@@ -141,6 +147,7 @@ def preparar(id):
     return render_template('menus/preparar.html', menu=menu, platos=platos)
 
 @menus_bp.route('/calendario')
+@login_required
 def calendario():
     """Vista de calendario semanal de menús"""
     semana = request.args.get('semana', 1, type=int)

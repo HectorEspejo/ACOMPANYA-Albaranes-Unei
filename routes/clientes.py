@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required
 from database import db
 from database.models import Cliente
 import csv
@@ -7,6 +8,7 @@ import io
 clientes_bp = Blueprint('clientes', __name__)
 
 @clientes_bp.route('/')
+@login_required
 def listar():
     """List all clients"""
     page = request.args.get('page', 1, type=int)
@@ -33,6 +35,7 @@ def listar():
                          ciudades=ciudades)
 
 @clientes_bp.route('/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo():
     """Create new client"""
     if request.method == 'POST':
@@ -65,6 +68,7 @@ def nuevo():
     return render_template('clientes/formulario.html', cliente=None)
 
 @clientes_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     """Edit existing client"""
     cliente = Cliente.query.get_or_404(id)
@@ -100,6 +104,7 @@ def editar(id):
     return render_template('clientes/formulario.html', cliente=cliente)
 
 @clientes_bp.route('/eliminar/<int:id>', methods=['POST'])
+@login_required
 def eliminar(id):
     """Delete client"""
     cliente = Cliente.query.get_or_404(id)
@@ -120,6 +125,7 @@ def eliminar(id):
     return redirect(url_for('clientes.listar'))
 
 @clientes_bp.route('/importar', methods=['GET', 'POST'])
+@login_required
 def importar():
     """Import clients from CSV file"""
     if request.method == 'POST':
@@ -191,6 +197,7 @@ def importar():
     return render_template('clientes/importar.html')
 
 @clientes_bp.route('/exportar')
+@login_required
 def exportar():
     """Export all clients to CSV"""
     clientes = Cliente.query.order_by(Cliente.nombre).all()
@@ -225,6 +232,7 @@ def exportar():
     return response
 
 @clientes_bp.route('/api/todos')
+@login_required
 def api_todos():
     """API endpoint to get all clients"""
     clientes = Cliente.query.order_by(Cliente.nombre).all()

@@ -44,6 +44,13 @@ Sistema integral de gestión para cocinas y caterings que permite administrar in
 - **Exportación**: Reportes en CSV
 - **Filtros**: Análisis por rangos de fechas personalizables
 
+### 🔐 Sistema de Autenticación
+- **Login Obligatorio**: Acceso protegido a todas las funcionalidades
+- **Gestión de Usuarios**: Base de datos segura con contraseñas hasheadas
+- **Sesiones Seguras**: Control de sesiones con Flask-Login
+- **Script de Gestión**: Herramienta administrativa para crear/eliminar usuarios
+- **Interfaz Intuitiva**: Login responsive con validación de credenciales
+
 ### 📥 Sistema de Importación
 - **Tipos de Menú**: Definición de categorías de comida
 - **Menús Masivos**: Carga de múltiples menús con platos
@@ -54,9 +61,11 @@ Sistema integral de gestión para cocinas y caterings que permite administrar in
 
 ### Backend
 - **Flask**: Framework web de Python
+- **Flask-Login**: Sistema de autenticación y sesiones
 - **SQLAlchemy**: ORM para base de datos
 - **SQLite**: Base de datos embebida
 - **Python 3.10+**: Lenguaje de programación
+- **Werkzeug**: Utilidades WSGI y hashing seguro
 
 ### Frontend
 - **Bootstrap 4**: Framework CSS responsivo
@@ -68,6 +77,7 @@ Sistema integral de gestión para cocinas y caterings que permite administrar in
 ### Características Técnicas
 - **Arquitectura MVC**: Separación clara de responsabilidades
 - **Blueprints**: Modularización de rutas
+- **Sistema de Login**: Autenticación obligatoria con Flask-Login
 - **Validación**: Control de datos y relaciones
 - **Manejo de Errores**: Sistema robusto de excepciones
 - **Modo Debug**: Funcionalidad especial para desarrollo
@@ -105,6 +115,7 @@ alabaranes-unei2/
 │   └── js/
 ├── utils/                # Utilidades
 │   └── stock_manager.py
+├── crear_usuarios.py     # Script de gestión de usuarios
 └── requirements.txt      # Dependencias
 ```
 
@@ -127,6 +138,9 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 # Instalar dependencias
 pip install -r requirements.txt
 
+# Crear usuarios del sistema
+python crear_usuarios.py
+
 # Ejecutar la aplicación
 python app.py
 ```
@@ -135,6 +149,12 @@ python app.py
 - **URL**: http://localhost:5000
 - **Puerto**: 5000 (configurable)
 - **Host**: 0.0.0.0 (accesible desde la red local)
+
+### Credenciales de Prueba
+- **Usuario**: admin
+- **Contraseña**: admin123
+
+*Nota: Es recomendable cambiar estas credenciales en producción*
 
 ## ⚙️ Configuración
 
@@ -190,9 +210,12 @@ python load_sample_data.py
 - APIs REST para integraciones futuras
 
 ### Seguridad
-- Validación de datos en servidor
-- Protección contra inyección SQL mediante ORM
-- Manejo seguro de archivos CSV
+- **Sistema de Autenticación**: Login obligatorio para todas las funcionalidades
+- **Contraseñas Seguras**: Hash con Werkzeug para protección de credenciales
+- **Gestión de Sesiones**: Control seguro con Flask-Login
+- **Validación de Datos**: Control en servidor y cliente
+- **Protección SQL**: Prevención de inyección mediante ORM
+- **Manejo de Archivos**: Procesamiento seguro de CSV
 
 ---
 

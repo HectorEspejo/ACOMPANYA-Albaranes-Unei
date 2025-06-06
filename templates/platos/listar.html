@@ -8,6 +8,15 @@
     <a href="{{ url_for('platos.nuevo') }}" class="btn btn-success">Nuevo Plato</a>
 </div>
 
+<div class="search-section">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar platos por nombre..." class="search-input">
+        <div class="search-stats">
+            <span id="searchStats">Mostrando {{ platos.items|length }} de {{ platos.total }} platos</span>
+        </div>
+    </div>
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -54,4 +63,78 @@
     {% endif %}
 </div>
 {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.querySelector('.table tbody');
+    const searchStats = document.getElementById('searchStats');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const totalPlatos = {{ platos.total }};
+    
+    function updateStats(visibleCount) {
+        if (searchInput.value.trim() === '') {
+            searchStats.textContent = `Mostrando ${rows.length} de ${totalPlatos} platos`;
+        } else {
+            searchStats.textContent = `Encontrados ${visibleCount} platos de ${totalPlatos} total`;
+        }
+    }
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const platoName = row.querySelector('td:first-child').textContent.toLowerCase();
+            const isVisible = platoName.includes(searchTerm);
+            
+            if (isVisible) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateStats(visibleCount);
+        
+        // Mostrar mensaje si no hay resultados
+        const noResultsRow = table.querySelector('.no-results');
+        if (noResultsRow) {
+            noResultsRow.remove();
+        }
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+            const noResultsRow = document.createElement('tr');
+            noResultsRow.className = 'no-results';
+            noResultsRow.innerHTML = `
+                <td colspan="6" class="text-center" style="padding: 2rem; color: #666; font-style: italic;">
+                    No se encontraron platos que coincidan con "${searchTerm}"
+                </td>
+            `;
+            table.appendChild(noResultsRow);
+        }
+    }
+    
+    // Búsqueda en tiempo real
+    searchInput.addEventListener('input', performSearch);
+    
+    // Limpiar búsqueda con Escape
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            performSearch();
+            this.blur();
+        }
+    });
+    
+    // Enfocar el buscador con Ctrl+F
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
+});
+</script>
 {% endblock %}

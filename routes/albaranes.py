@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, Response, jsonify
+from flask_login import login_required
 from database import db
 from database.models import Albaran, AlbaranDetalle, Menu, Plato, Cliente, DiaSemana
 from datetime import datetime
@@ -9,6 +10,7 @@ import io
 albaranes_bp = Blueprint('albaranes', __name__)
 
 @albaranes_bp.route('/')
+@login_required
 def listar():
     page = request.args.get('page', 1, type=int)
     fecha_desde = request.args.get('fecha_desde')
@@ -27,6 +29,7 @@ def listar():
     return render_template('albaranes/listar.html', albaranes=albaranes)
 
 @albaranes_bp.route('/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo():
     if request.method == 'POST':
         try:
@@ -118,6 +121,7 @@ def nuevo():
                          clientes=clientes)
 
 @albaranes_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     albaran = Albaran.query.get_or_404(id)
     
@@ -241,6 +245,7 @@ def editar(id):
                          detalles_individuales=detalles_individuales)
 
 @albaranes_bp.route('/ver/<int:id>')
+@login_required
 def ver(id):
     albaran = Albaran.query.get_or_404(id)
     
@@ -260,6 +265,7 @@ def ver(id):
                          detalles_individuales=detalles_individuales)
 
 @albaranes_bp.route('/imprimir/<int:id>')
+@login_required
 def imprimir(id):
     albaran = Albaran.query.get_or_404(id)
     
@@ -283,6 +289,7 @@ def imprimir(id):
     return response
 
 @albaranes_bp.route('/exportar/<int:id>')
+@login_required
 def exportar_csv(id):
     albaran = Albaran.query.get_or_404(id)
     
@@ -346,6 +353,7 @@ def exportar_csv(id):
     return response
 
 @albaranes_bp.route('/exportar-multiple', methods=['POST'])
+@login_required
 def exportar_multiple_csv():
     """Export multiple albarans to a single CSV file"""
     albaran_ids = request.form.getlist('albaran_ids[]')
@@ -427,6 +435,7 @@ def exportar_multiple_csv():
     return response
 
 @albaranes_bp.route('/eliminar/<int:id>', methods=['POST'])
+@login_required
 def eliminar(id):
     albaran = Albaran.query.get_or_404(id)
     try:
@@ -454,6 +463,7 @@ def eliminar(id):
     return redirect(url_for('albaranes.listar'))
 
 @albaranes_bp.route('/api/menus/<int:menu_id>/platos')
+@login_required
 def api_menu_platos(menu_id):
     """Get dishes for a specific menu (for dynamic form updates)"""
     menu = Menu.query.get_or_404(menu_id)
@@ -472,6 +482,7 @@ def api_menu_platos(menu_id):
     return {'platos': platos_data}
 
 @albaranes_bp.route('/duplicar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def duplicar(id):
     albaran_original = Albaran.query.get_or_404(id)
     
@@ -600,6 +611,7 @@ def duplicar(id):
                          dia_original=dia_original)
 
 @albaranes_bp.route('/api/verificar-menus', methods=['POST'])
+@login_required
 def api_verificar_menus():
     """Verify if menus exist for target week and day"""
     data = request.get_json()

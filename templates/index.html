@@ -8,6 +8,95 @@
     <p class="lead">Sistema integral para la gestión de ingredientes, platos, menús y albaranes de Acompanya.</p>
 </div>
 
+<div class="updates-section">
+    <button class="updates-toggle" onclick="toggleUpdates()">
+        <span class="updates-title">🔄 Últimas actualizaciones</span>
+        <span class="updates-arrow">▼</span>
+    </button>
+    <div class="updates-content" id="updates-content">
+        <div class="updates-grid">
+            <div class="update-card">
+                <div class="update-header">
+                    <h4>🔐 Sistema de autenticación</h4>
+                    <span class="update-date">Actualización v1.0</span>
+                </div>
+                <div class="update-content">
+                    <ul>
+                        <li><strong>Inicio de sesión obligatorio:</strong> Acceso seguro a todas las funcionalidades</li>
+                        <li><strong>Sesiones Seguras:</strong> Control de acceso</li>
+                        <li><strong>Métodos de seguridad:</strong> Añadida seguridad reforzada en la aplicación con encriptación</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="update-card">
+                <div class="update-header">
+                    <h4>📊 Cuadro de mando mejorado</h4>
+                    <span class="update-date">Actualización v0.7</span>
+                </div>
+                <div class="update-content">
+                    <ul>
+                        <li><strong>Análisis avanzado:</strong> Estadísticas detalladas por período</li>
+                        <li><strong>Gráficos interactivos:</strong> Visualización de datos con gráficos</li>
+                        <li><strong>Exportación mejorada:</strong> Reportes en CSV optimizados</li>
+                        <li><strong>Filtros personalizables:</strong> Análisis por rangos de fecha</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="update-card">
+                <div class="update-header">
+                    <h4>🔄 Albaranes masivos</h4>
+                    <span class="update-date">Actualización v0.5</span>
+                </div>
+                <div class="update-content">
+                    <ul>
+                        <li><strong>Generación automática:</strong> Albaranes para múltiples clientes</li>
+                        <li><strong>Duplicación inteligente:</strong> Copia de albaranes con ajustes</li>
+                        <li><strong>Validación avanzada:</strong> Control de stock y disponibilidad</li>
+                        <li><strong>Exportación masiva:</strong> Múltiples formatos de salida</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="update-card">
+                <div class="update-header">
+                    <h4>🍽️ Gestión de menús avanzada</h4>
+                    <span class="update-date">Actualización v0.1</span>
+                </div>
+                <div class="update-content">
+                    <ul>
+                        <li><strong>Calendario semanal:</strong> Planificación visual de menús</li>
+                        <li><strong>Tipos de comida:</strong> Categorización completa (desayuno, almuerzo, cena, merienda)</li>
+                        <li><strong>Preparación masiva:</strong> Control de producción por lotes</li>
+                        <li><strong>Importación CSV:</strong> Carga masiva de menús desde archivos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUpdates() {
+    const content = document.getElementById('updates-content');
+    const arrow = document.querySelector('.updates-arrow');
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        arrow.textContent = '▲';
+    } else {
+        content.style.display = 'none';
+        arrow.textContent = '▼';
+    }
+}
+
+// Inicializar como cerrado
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('updates-content').style.display = 'none';
+});
+</script>
+
 <div class="dashboard-grid">
     <div class="dashboard-card">
         <h3>Ingredientes</h3>

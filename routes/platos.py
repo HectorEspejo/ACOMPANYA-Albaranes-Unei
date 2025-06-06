@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required
 from database import db
 from database.models import Plato, Ingrediente, platos_ingredientes
 from sqlalchemy import insert
@@ -6,12 +7,14 @@ from sqlalchemy import insert
 platos_bp = Blueprint('platos', __name__)
 
 @platos_bp.route('/')
+@login_required
 def listar():
     page = request.args.get('page', 1, type=int)
     platos = Plato.query.paginate(page=page, per_page=20, error_out=False)
     return render_template('platos/listar.html', platos=platos)
 
 @platos_bp.route('/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo():
     if request.method == 'POST':
         try:
@@ -51,6 +54,7 @@ def nuevo():
     return render_template('platos/formulario.html', plato=None, ingredientes=ingredientes)
 
 @platos_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     plato = Plato.query.get_or_404(id)
     
@@ -93,6 +97,7 @@ def editar(id):
                          ingredientes_actuales=ingredientes_actuales)
 
 @platos_bp.route('/eliminar/<int:id>', methods=['POST'])
+@login_required
 def eliminar(id):
     plato = Plato.query.get_or_404(id)
     try:
@@ -106,6 +111,7 @@ def eliminar(id):
     return redirect(url_for('platos.listar'))
 
 @platos_bp.route('/producir/<int:id>', methods=['GET', 'POST'])
+@login_required
 def producir(id):
     plato = Plato.query.get_or_404(id)
     
@@ -125,6 +131,7 @@ def producir(id):
     return render_template('platos/producir.html', plato=plato, ingredientes=ingredientes)
 
 @platos_bp.route('/api/ingredientes')
+@login_required
 def api_ingredientes():
     """API endpoint para obtener ingredientes (para select2 o similar)"""
     q = request.args.get('q', '')

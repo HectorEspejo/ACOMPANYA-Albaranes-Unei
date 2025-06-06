@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, Response
+from flask_login import login_required
 from database import db
 from database.models import Albaran, AlbaranDetalle, Menu, Plato, Cliente, TipoComida
 from sqlalchemy import func, extract
@@ -10,10 +11,12 @@ import io
 cuadro_mando_bp = Blueprint('cuadro_mando', __name__)
 
 @cuadro_mando_bp.route('/')
+@login_required
 def index():
     return render_template('cuadro_mando/index.html')
 
 @cuadro_mando_bp.route('/api/estadisticas/platos')
+@login_required
 def estadisticas_platos():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')
@@ -42,6 +45,7 @@ def estadisticas_platos():
     } for r in resultados])
 
 @cuadro_mando_bp.route('/api/estadisticas/menus')
+@login_required
 def estadisticas_menus():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')
@@ -72,6 +76,7 @@ def estadisticas_menus():
     } for r in resultados])
 
 @cuadro_mando_bp.route('/api/estadisticas/menus-por-cliente')
+@login_required
 def estadisticas_menus_por_cliente():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')
@@ -110,6 +115,7 @@ def estadisticas_menus_por_cliente():
 
 # Endpoints de exportación CSV
 @cuadro_mando_bp.route('/exportar/menus')
+@login_required
 def exportar_menus_csv():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')
@@ -164,6 +170,7 @@ def exportar_menus_csv():
     return response
 
 @cuadro_mando_bp.route('/exportar/platos')
+@login_required
 def exportar_platos_csv():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')
@@ -216,6 +223,7 @@ def exportar_platos_csv():
     return response
 
 @cuadro_mando_bp.route('/exportar/clientes')
+@login_required
 def exportar_clientes_csv():
     fecha_desde = request.args.get('fecha_desde')
     fecha_hasta = request.args.get('fecha_hasta')

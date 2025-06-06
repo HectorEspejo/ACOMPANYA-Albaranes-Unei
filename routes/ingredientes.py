@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required
 from database import db
 from database.models import Ingrediente, TipoUnidad, TipoMovimiento
 from datetime import datetime
@@ -6,12 +7,14 @@ from datetime import datetime
 ingredientes_bp = Blueprint('ingredientes', __name__)
 
 @ingredientes_bp.route('/')
+@login_required
 def listar():
     page = request.args.get('page', 1, type=int)
     ingredientes = Ingrediente.query.paginate(page=page, per_page=20, error_out=False)
     return render_template('ingredientes/listar.html', ingredientes=ingredientes)
 
 @ingredientes_bp.route('/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo():
     if request.method == 'POST':
         try:
@@ -39,6 +42,7 @@ def nuevo():
     return render_template('ingredientes/formulario.html', ingrediente=None, tipos_unidad=TipoUnidad)
 
 @ingredientes_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     ingrediente = Ingrediente.query.get_or_404(id)
     
@@ -65,6 +69,7 @@ def editar(id):
     return render_template('ingredientes/formulario.html', ingrediente=ingrediente, tipos_unidad=TipoUnidad)
 
 @ingredientes_bp.route('/eliminar/<int:id>', methods=['POST'])
+@login_required
 def eliminar(id):
     ingrediente = Ingrediente.query.get_or_404(id)
     try:
@@ -78,6 +83,7 @@ def eliminar(id):
     return redirect(url_for('ingredientes.listar'))
 
 @ingredientes_bp.route('/stock/<int:id>', methods=['GET', 'POST'])
+@login_required
 def ajustar_stock(id):
     ingrediente = Ingrediente.query.get_or_404(id)
     

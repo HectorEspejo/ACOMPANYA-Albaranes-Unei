@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required
 from database import db
 from database.models import Cliente, Menu, Albaran, AlbaranDetalle, TipoComida, DiaSemana
 import csv
@@ -111,11 +112,13 @@ def get_week_start_date(week_number, base_date=None):
     return week_start
 
 @albaranes_masivos_bp.route('/')
+@login_required
 def index():
     """Muestra la página principal de generación masiva de albaranes"""
     return render_template('albaranes_masivos/index.html')
 
 @albaranes_masivos_bp.route('/generar', methods=['GET', 'POST'])
+@login_required
 def generar():
     """Genera albaranes masivos desde el archivo CSV"""
     if request.method == 'POST':

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask_login import login_required
 from database import db
 from database.models import Ingrediente, Plato, TipoUnidad, platos_ingredientes, Menu, Cliente, Albaran, AlbaranDetalle, TipoComida, DiaSemana, menus_platos
 from sqlalchemy import insert
@@ -55,11 +56,13 @@ def convert_quantity(cantidad, unidad_origen, unidad_destino):
     return cantidad
 
 @importar_bp.route('/')
+@login_required
 def index():
     """Show import options"""
     return render_template('importar/index.html')
 
 @importar_bp.route('/platos', methods=['GET', 'POST'])
+@login_required
 def importar_platos():
     """Import dishes from CSV file"""
     if request.method == 'POST':
@@ -113,6 +116,7 @@ def importar_platos():
     return render_template('importar/platos.html')
 
 @importar_bp.route('/platos/preview', methods=['GET', 'POST'])
+@login_required
 def preview_platos():
     """Preview and edit import data before confirmation"""
     if 'import_data' not in session:
@@ -222,6 +226,7 @@ def preview_platos():
                          plato_exists=plato_exists)
 
 @importar_bp.route('/platos/cancel')
+@login_required
 def cancel_import():
     """Cancel import and clear session data"""
     session.pop('import_data', None)
@@ -229,6 +234,7 @@ def cancel_import():
     return redirect(url_for('importar.importar_platos'))
 
 @importar_bp.route('/inventario', methods=['GET', 'POST'])
+@login_required
 def importar_inventario():
     """Import dishes from inventory CSV file (simple format with just dish names)"""
     if request.method == 'POST':
@@ -290,6 +296,7 @@ def importar_inventario():
     return render_template('importar/inventario.html')
 
 @importar_bp.route('/tipos-menu', methods=['GET', 'POST'])
+@login_required
 def importar_tipos_menu():
     """Import menu types from CSV file and create menus for each week and day"""
     if request.method == 'POST':
@@ -383,6 +390,7 @@ def importar_tipos_menu():
     return render_template('importar/tipos_menu.html')
 
 @importar_bp.route('/requisitos-menu', methods=['GET', 'POST'])
+@login_required
 def importar_requisitos_menu():
     """Import menu requirements per client from CSV file"""
     if request.method == 'POST':
@@ -601,11 +609,13 @@ def importar_requisitos_menu():
     return render_template('importar/requisitos_menu.html')
 
 @importar_bp.route('/menus', methods=['GET'])
+@login_required
 def menus():
     """Show menu import form"""
     return render_template('importar/menus.html')
 
 @importar_bp.route('/menus/upload', methods=['POST'])
+@login_required
 def upload_menus():
     """Process menu CSV file and show preview"""
     if 'file' not in request.files:
@@ -815,6 +825,7 @@ def upload_menus():
         return redirect(url_for('importar.menus'))
 
 @importar_bp.route('/menus/confirm', methods=['POST'])
+@login_required
 def confirm_menus():
     """Confirm and save imported menus"""
     if 'menus_import' not in session:

@@ -31,6 +31,15 @@
     </div>
 </form>
 
+<div class="search-section">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar menús por nombre, dieta o tipo de comida..." class="search-input">
+        <div class="search-stats">
+            <span id="searchStats">Mostrando {{ menus.items|length }} de {{ menus.total }} menús</span>
+        </div>
+    </div>
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -83,4 +92,93 @@
     {% endif %}
 </div>
 {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.querySelector('.table tbody');
+    const searchStats = document.getElementById('searchStats');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const totalMenus = {{ menus.total }};
+    
+    function updateStats(visibleCount) {
+        if (searchInput.value.trim() === '') {
+            searchStats.textContent = `Mostrando ${rows.length} de ${totalMenus} menús`;
+        } else {
+            searchStats.textContent = `Encontrados ${visibleCount} menús de ${totalMenus} total`;
+        }
+    }
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const menuName = cells[0].textContent.toLowerCase();
+            const dieta = cells[4].textContent.toLowerCase();
+            const tipoComida = cells[3].textContent.toLowerCase();
+            const diaSemana = cells[2].textContent.toLowerCase();
+            
+            const isVisible = menuName.includes(searchTerm) || 
+                            dieta.includes(searchTerm) || 
+                            tipoComida.includes(searchTerm) ||
+                            diaSemana.includes(searchTerm);
+            
+            if (isVisible) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateStats(visibleCount);
+        
+        // Mostrar mensaje si no hay resultados
+        const noResultsRow = table.querySelector('.no-results');
+        if (noResultsRow) {
+            noResultsRow.remove();
+        }
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+            const noResultsRow = document.createElement('tr');
+            noResultsRow.className = 'no-results';
+            noResultsRow.innerHTML = `
+                <td colspan="7" class="text-center" style="padding: 2rem; color: #666; font-style: italic;">
+                    No se encontraron menús que coincidan con "${searchTerm}"
+                </td>
+            `;
+            table.appendChild(noResultsRow);
+        }
+    }
+    
+    // Búsqueda en tiempo real
+    searchInput.addEventListener('input', performSearch);
+    
+    // Limpiar búsqueda con Escape
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            performSearch();
+            this.blur();
+        }
+    });
+    
+    // Enfocar el buscador con Ctrl+F
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
+    
+    // Resaltar términos de búsqueda
+    function highlightSearchTerm(text, searchTerm) {
+        if (!searchTerm) return text;
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+});
+</script>
 {% endblock %}

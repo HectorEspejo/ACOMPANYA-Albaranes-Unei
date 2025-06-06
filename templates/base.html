@@ -14,22 +14,59 @@
                 <span class="subtitle">Sistema de Gestión de Albaranes</span>
             </div>
             <ul class="nav-menu">
-                <li><a href="{{ url_for('index') }}">Inicio</a></li>
-                <li><a href="{{ url_for('ingredientes.listar') }}">Ingredientes</a></li>
-                <li><a href="{{ url_for('platos.listar') }}">Platos</a></li>
-                <li><a href="{{ url_for('menus.listar') }}">Menús</a></li>
-                <li><a href="{{ url_for('clientes.listar') }}">Clientes</a></li>
-                <li><a href="{{ url_for('albaranes.listar') }}">Albaranes</a></li>
-                <li><a href="{{ url_for('albaranes_masivos.index') }}">Albaranes Masivos</a></li>
-                <li><a href="{{ url_for('cuadro_mando.index') }}">Cuadro de Mando</a></li>
-                <li><a href="{{ url_for('importar.index') }}">Importar</a></li>
+                <li><a href="{{ url_for('index') }}" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Inicio</span>
+                </a></li>
+                
+                <li class="nav-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Gestión</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('ingredientes.listar') }}">🥄 Ingredientes</a></li>
+                        <li><a href="{{ url_for('platos.listar') }}">🍗 Platos</a></li>
+                        <li><a href="{{ url_for('menus.listar') }}">🍽️ Menús</a></li>
+                        <li><a href="{{ url_for('clientes.listar') }}">👥 Clientes</a></li>
+                    </ul>
+                </li>
+                
+                <li class="nav-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="nav-icon">📄</span>
+                        <span class="nav-text">Albaranes</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('albaranes.listar') }}">📋 Ver Albaranes</a></li>
+                        <li><a href="{{ url_for('albaranes_masivos.index') }}">📊 Albaranes Masivos</a></li>
+                    </ul>
+                </li>
+                
+                <li><a href="{{ url_for('cuadro_mando.index') }}" class="nav-link">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Dashboard</span>
+                </a></li>
+                
+                <li><a href="{{ url_for('importar.index') }}" class="nav-link">
+                    <span class="nav-icon">📥</span>
+                    <span class="nav-text">Importar</span>
+                </a></li>
+                
+                <li class="user-menu">
+                    <span class="username">
+                        <span class="user-icon">👤</span>
+                        {{ current_user.nombre_usuario }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">
+                        <span class="logout-icon">🚪</span>
+                        Salir
+                    </a>
+                </li>
             </ul>
         </nav>
-        {% if config.DEBUG_MODE %}
-        <div class="debug-mode-banner">
-            <strong>⚠️ MODO DEBUG ACTIVO</strong> - Las verificaciones de stock están deshabilitadas
-        </div>
-        {% endif %}
     </header>
 
     <main class="container">
@@ -55,6 +92,57 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+    // Navigation dropdown functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const dropdown = this.closest('.nav-dropdown');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                const arrow = dropdown.querySelector('.dropdown-arrow');
+                
+                // Close other dropdowns
+                dropdownToggles.forEach(otherToggle => {
+                    if (otherToggle !== this) {
+                        const otherDropdown = otherToggle.closest('.nav-dropdown');
+                        const otherMenu = otherDropdown.querySelector('.dropdown-menu');
+                        const otherArrow = otherDropdown.querySelector('.dropdown-arrow');
+                        otherMenu.style.display = 'none';
+                        otherArrow.textContent = '▼';
+                    }
+                });
+                
+                // Toggle current dropdown
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                    arrow.textContent = '▼';
+                } else {
+                    menu.style.display = 'block';
+                    arrow.textContent = '▲';
+                }
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-dropdown')) {
+                dropdownToggles.forEach(toggle => {
+                    const dropdown = toggle.closest('.nav-dropdown');
+                    const menu = dropdown.querySelector('.dropdown-menu');
+                    const arrow = dropdown.querySelector('.dropdown-arrow');
+                    menu.style.display = 'none';
+                    arrow.textContent = '▼';
+                });
+            }
+        });
+    });
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>
