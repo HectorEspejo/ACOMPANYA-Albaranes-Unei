@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code|default(404) }} - Acompanya{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-icon">
+            {% if error_code == 404 %}
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+            {% else %}
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            {% endif %}
+        </div>
+        
+        <h1 class="error-code">{{ error_code|default(404) }}</h1>
+        
+        <h2 class="error-title">
+            {% if error_code == 404 %}
+                Página no encontrada
+            {% elif error_code == 403 %}
+                Acceso denegado
+            {% elif error_code == 500 %}
+                Error del servidor
+            {% else %}
+                Ha ocurrido un error
+            {% endif %}
+        </h2>
+        
+        <p class="error-message">
+            {% if error_message %}
+                {{ error_message }}
+            {% elif error_code == 404 %}
+                Lo sentimos, la página que buscas no existe o ha sido movida.
+            {% elif error_code == 403 %}
+                No tienes permisos para acceder a este recurso.
+            {% elif error_code == 500 %}
+                Ha ocurrido un error interno. Por favor, inténtalo más tarde.
+            {% else %}
+                Algo salió mal. Por favor, inténtalo de nuevo.
+            {% endif %}
+        </p>
+        
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-large">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Volver al inicio
+        </a>
+    </div>
+</div>
+
+<style>
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 2rem;
+}
+
+.error-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.error-icon {
+    margin-bottom: 2rem;
+    color: #e74c3c;
+}
+
+.error-code {
+    font-size: 5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    line-height: 1;
+}
+
+.error-title {
+    font-size: 2rem;
+    color: #34495e;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-large svg {
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .error-code {
+        font-size: 3.5rem;
+    }
+    
+    .error-title {
+        font-size: 1.5rem;
+    }
+    
+    .error-icon svg {
+        width: 80px;
+        height: 80px;
+    }
+}
+</style>
+{% endblock %}

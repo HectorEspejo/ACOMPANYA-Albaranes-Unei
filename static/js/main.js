@@ -136,3 +136,8 @@ function removeIngredientFromPlato(platoId, ingredienteId) {
         alert('Error al quitar ingrediente');
     });
 }
+
+// Confirm delete function for forms
+function confirmDelete(message) {
+    return confirm(message || '¿Está seguro de que desea eliminar este elemento?');
+}

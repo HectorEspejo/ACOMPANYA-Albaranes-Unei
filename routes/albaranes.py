@@ -430,6 +430,9 @@ def exportar_multiple_csv():
 def eliminar(id):
     albaran = Albaran.query.get_or_404(id)
     try:
+        # Log para depuración
+        print(f"Eliminando albarán ID: {id}, Referencia: {albaran.referencia}")
+        
         # Restore stock before deleting
         for detalle in albaran.detalles:
             if detalle.menu_id:
@@ -441,8 +444,10 @@ def eliminar(id):
         
         db.session.delete(albaran)
         db.session.commit()
+        print(f"Albarán {id} eliminado correctamente de la base de datos")
         flash('Albarán eliminado exitosamente y stock restaurado', 'success')
     except Exception as e:
+        print(f"Error al eliminar albarán {id}: {str(e)}")
         flash(f'Error al eliminar albarán: {str(e)}', 'danger')
         db.session.rollback()
     

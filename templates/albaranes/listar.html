@@ -66,9 +66,7 @@
                     <a href="{{ url_for('albaranes.editar', id=albaran.id) }}" class="btn btn-sm btn-warning">Editar</a>
                     <a href="{{ url_for('albaranes.imprimir', id=albaran.id) }}" class="btn btn-sm btn-primary" target="_blank">Imprimir</a>
                     <a href="{{ url_for('albaranes.exportar_csv', id=albaran.id) }}" class="btn btn-sm btn-success">CSV</a>
-                    <form action="{{ url_for('albaranes.eliminar', id=albaran.id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('¿Eliminar este albarán?')">
-                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="eliminarAlbaran({{ albaran.id }})">Eliminar</button>
                 </div>
             </td>
         </tr>
@@ -142,5 +140,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function eliminarAlbaran(id) {
+    if (confirm('¿Eliminar este albarán?')) {
+        // Crear un formulario temporal para enviar la petición POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/albaranes/eliminar/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 {% endblock %}

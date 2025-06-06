@@ -35,6 +35,19 @@ def create_app():
     def dashboard():
         return render_template('dashboard.html')
     
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('error.html', error_code=404), 404
+    
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        return render_template('error.html', error_code=403), 403
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        return render_template('error.html', error_code=500), 500
+    
     return app
 
 if __name__ == '__main__':
