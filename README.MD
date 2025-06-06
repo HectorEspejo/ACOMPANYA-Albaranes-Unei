@@ -1,6 +1,6 @@
-# 🍽️ Acompanya - Sistema de Gestión de Albaranes
+# 🍽️ ALBA - Sistema de Gestión de Albaranes
 
-Sistema integral de gestión para cocina industrial que permite administrar ingredientes, platos, menús y generar albaranes de entrega con control de stock y trazabilidad completa.
+Sistema integral de gestión para cocinas y caterings que permite administrar ingredientes, platos, menús y generar albaranes de entrega con control de stock y trazabilidad completa.
 
 ## 📋 Funcionalidades Principales
 
