@@ -3,6 +3,7 @@ from config import Config
 from database import init_db
 from routes import ingredientes_bp, platos_bp, menus_bp, albaranes_bp, importar_bp, clientes_bp
 from routes.albaranes_masivos import albaranes_masivos_bp
+from routes.cuadro_mando import cuadro_mando_bp
 
 def create_app():
     app = Flask(__name__)
@@ -19,6 +20,7 @@ def create_app():
     app.register_blueprint(importar_bp, url_prefix='/importar')
     app.register_blueprint(clientes_bp, url_prefix='/clientes')
     app.register_blueprint(albaranes_masivos_bp, url_prefix='/albaranes-masivos')
+    app.register_blueprint(cuadro_mando_bp, url_prefix='/cuadro-mando')
     
     # Make config available in templates
     @app.context_processor

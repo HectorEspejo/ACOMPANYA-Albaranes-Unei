@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from database import db
 from database.models import Cliente
 import csv
@@ -223,3 +223,13 @@ def exportar():
     response.data = '\ufeff' + response.data
     
     return response
+
+@clientes_bp.route('/api/todos')
+def api_todos():
+    """API endpoint to get all clients"""
+    clientes = Cliente.query.order_by(Cliente.nombre).all()
+    return jsonify([{
+        'id': c.id,
+        'nombre': c.nombre,
+        'ciudad': c.ciudad
+    } for c in clientes])
